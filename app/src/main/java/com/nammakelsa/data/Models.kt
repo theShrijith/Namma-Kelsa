@@ -2,16 +2,15 @@ package com.nammakelsa.data
 
 /**
  * Represents a worker in the marketplace.
- * UI-only model — no backend persistence.
  */
 data class Worker(
-    val id: Int,
-    val name: String,
-    val phone: String,
-    val skill: String,
-    val dailyRate: Int,
-    val distance: String,
-    val isAvailable: Boolean,
+    val id: String = "",
+    val name: String = "",
+    val phone: String = "",
+    val skill: String = "",
+    val dailyRate: Int = 0,
+    val distance: String = "",
+    val isAvailable: Boolean = false,
     val rating: Float = 4.5f,
     val workerId: String = "",
     val profileImageUrl: String? = null,
@@ -23,7 +22,7 @@ data class Worker(
  * Represents a customer user.
  */
 data class Customer(
-    val id: Int = 0,
+    val id: String = "",
     val name: String = "",
     val phone: String = "",
     val email: String = "",
@@ -31,16 +30,28 @@ data class Customer(
 )
 
 /**
+ * Base User representation for Authentication and Role management.
+ */
+data class User(
+    val uid: String = "",
+    val email: String = "",
+    val role: UserRole = UserRole.CUSTOMER,
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+/**
  * Represents a work request sent by a customer to a worker.
  */
 data class WorkRequest(
-    val id: Int,
-    val customerName: String,
-    val workType: String,
-    val description: String,
-    val location: String,
-    val date: String,
-    val budget: String,
+    val id: String = "",
+    val customerId: String = "",
+    val workerId: String = "",
+    val customerName: String = "",
+    val workType: String = "",
+    val description: String = "",
+    val location: String = "",
+    val date: String = "",
+    val budget: String = "",
     val notes: String = "",
     val status: RequestStatus = RequestStatus.PENDING
 )
@@ -67,12 +78,13 @@ enum class UserRole {
  * Represents a notification.
  */
 data class Notification(
-    val id: Int,
-    val title: String,
-    val message: String,
-    val timestamp: String,
-    val isRead: Boolean,
-    val type: NotificationType
+    val id: String = "",
+    val userId: String = "",
+    val title: String = "",
+    val message: String = "",
+    val timestamp: String = "",
+    val isRead: Boolean = false,
+    val type: NotificationType = NotificationType.INFO
 )
 
 /**

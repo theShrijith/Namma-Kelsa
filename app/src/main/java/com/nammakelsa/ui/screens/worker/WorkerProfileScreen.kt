@@ -23,6 +23,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import com.nammakelsa.ui.theme.*
 
 @Composable
@@ -31,13 +34,29 @@ fun WorkerProfileScreen(
     workerId: String,
     workerSkill: String,
     workerDailyRate: String,
+    profileImageUrl: String?,
+    galleryImages: List<String>,
     isDarkMode: Boolean,
     onDarkModeToggle: (Boolean) -> Unit,
     onEditProfileClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    onUploadProfileImage: (Uri) -> Unit,
+    onUploadGalleryImage: (Uri) -> Unit
 ) {
     val spacing = LocalSpacing.current
+
+    val profileLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { onUploadProfileImage(it) }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { onUploadGalleryImage(it) }
+    }
 
     Column(
         modifier = Modifier
@@ -70,15 +89,26 @@ fun WorkerProfileScreen(
                         .size(spacing.avatarLarge)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.15f))
-                        .border(3.dp, Color.White.copy(alpha = 0.5f), CircleShape),
+                        .border(3.dp, Color.White.copy(alpha = 0.5f), CircleShape)
+                        .clickable { profileLauncher.launch("image/*") },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = (workerName.firstOrNull() ?: 'W').uppercase(),
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 40.sp
-                    )
+                    if (profileImageUrl != null) {
+                        // Coil AsyncImage can be placed here. Fallback to letter for now
+                        Text(
+                            text = "Img",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                    } else {
+                        Text(
+                            text = (workerName.firstOrNull() ?: 'W').uppercase(),
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 40.sp
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(spacing.sm))
@@ -128,19 +158,28 @@ fun WorkerProfileScreen(
                 )
         ) {
             // ── Work Gallery Preview ────────────────────────────────
-            Text(
-                text = "Work Gallery",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Work Gallery",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                TextButton(onClick = { galleryLauncher.launch("image/*") }) {
+                    Text("Add Image")
+                }
+            }
 
             Spacer(modifier = Modifier.height(spacing.xs))
 
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(spacing.xs + 4.dp)
             ) {
-                items(4) { index ->
+                items(if (galleryImages.isEmpty()) 1 else galleryImages.size) { index ->
                     Card(
                         modifier = Modifier.size(width = 110.dp, height = 90.dp),
                         shape = RoundedCornerShape(14.dp),
@@ -153,12 +192,22 @@ fun WorkerProfileScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Image,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(spacing.md)
-                            )
+                            if (galleryImages.isNotEmpty()) {
+                                // Real image loaded here
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    tint = AccentGreen,
+                                    modifier = Modifier.size(spacing.md)
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Image,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(spacing.md)
+                                )
+                            }
                         }
                     }
                 }

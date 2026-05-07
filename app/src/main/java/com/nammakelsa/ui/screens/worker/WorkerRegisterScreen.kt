@@ -35,6 +35,8 @@ fun WorkerRegisterScreen(
     onNameChange: (String) -> Unit,
     phone: String,
     onPhoneChange: (String) -> Unit,
+    email: String,
+    onEmailChange: (String) -> Unit,
     password: String,
     onPasswordChange: (String) -> Unit,
     location: String,
@@ -52,7 +54,7 @@ fun WorkerRegisterScreen(
 ) {
     val spacing = LocalSpacing.current
 
-    val formValid = name.isNotBlank() && phone.length == 10 &&
+    val formValid = name.isNotBlank() && phone.length == 10 && email.isNotBlank() &&
             password.length >= 6 && selectedSkills.isNotEmpty() &&
             dailyRate.isNotBlank() && location.isNotBlank()
 
@@ -250,6 +252,15 @@ fun WorkerRegisterScreen(
                         onValueChange = onPhoneChange,
                         label = "Phone Number",
                         leadingIcon = Icons.Default.Phone
+                    )
+
+                    Spacer(modifier = Modifier.height(spacing.sm))
+
+                    AppTextField(
+                        value = email,
+                        onValueChange = onEmailChange,
+                        label = "Email Address",
+                        leadingIcon = Icons.Default.Email
                     )
 
                     Spacer(modifier = Modifier.height(spacing.sm))

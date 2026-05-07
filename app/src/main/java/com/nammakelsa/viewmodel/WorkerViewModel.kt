@@ -4,28 +4,44 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import android.net.Uri
+import androidx.lifecycle.viewModelScope
 import com.nammakelsa.data.RequestStatus
 import com.nammakelsa.data.WorkRequest
+import com.nammakelsa.data.Worker
+import com.nammakelsa.repository.StorageRepository
+import com.nammakelsa.repository.StorageRepositoryImpl
+import com.nammakelsa.repository.WorkerRepository
+import com.nammakelsa.repository.WorkerRepositoryImpl
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel for Worker-specific UI state.
  * Manages availability, requests, profile, and registration.
  */
-class WorkerViewModel : ViewModel() {
+class WorkerViewModel(
+    private val workerRepository: WorkerRepository = WorkerRepositoryImpl(),
+    private val storageRepository: StorageRepository = StorageRepositoryImpl()
+) : ViewModel() {
 
     // ── Auth State ──────────────────────────────────────────────────
-    var loginWorkerId by mutableStateOf("")
+    var loginEmail by mutableStateOf("")
         private set
     var loginPassword by mutableStateOf("")
         private set
 
-    fun onLoginWorkerIdChange(value: String) { loginWorkerId = value.uppercase() }
+    fun onLoginEmailChange(value: String) { loginEmail = value }
     fun onLoginPasswordChange(value: String) { loginPassword = value }
 
     // ── Registration State ──────────────────────────────────────────
     var registerName by mutableStateOf("")
         private set
     var registerPhone by mutableStateOf("")
+        private set
+    var registerEmail by mutableStateOf("")
         private set
     var registerPassword by mutableStateOf("")
         private set
@@ -42,6 +58,7 @@ class WorkerViewModel : ViewModel() {
 
     fun onRegisterNameChange(value: String) { registerName = value }
     fun onRegisterPhoneChange(value: String) { registerPhone = value.filter { it.isDigit() }.take(10) }
+    fun onRegisterEmailChange(value: String) { registerEmail = value }
     fun onRegisterPasswordChange(value: String) { registerPassword = value }
     fun onRegisterLocationChange(value: String) { registerLocation = value }
     fun onRegisterDailyRateChange(value: String) { registerDailyRate = value.filter { it.isDigit() }.take(5) }
@@ -71,30 +88,78 @@ class WorkerViewModel : ViewModel() {
         generatedWorkerId = ""
     }
 
-    // ── Worker Profile ──────────────────────────────────────────────
-    var workerName by mutableStateOf("Raju Kumar")
-        private set
-    var workerId by mutableStateOf("NK-WRK-2041")
-        private set
-    var workerSkill by mutableStateOf("Painter")
-        private set
-    var workerDailyRate by mutableStateOf("800")
-        private set
-    var workerPhone by mutableStateOf("9876543210")
-        private set
+    // ── Worker Profile (Firestore via StateFlow) ────────────────────
+    private val _workerProfile = MutableStateFlow<Worker?>(null)
+    val workerProfile: StateFlow<Worker?> = _workerProfile.asStateFlow()
 
-    // ── Availability ────────────────────────────────────────────────
-    var isAvailable by mutableStateOf(true)
-        private set
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    fun loadProfile(uid: String) {
+        if (uid.isBlank()) return
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            workerRepository.getWorkerProfile(uid).onSuccess { worker ->
+                _workerProfile.value = worker
+            }.onFailure { error ->
+                _errorMessage.value = error.message
+            }
+            _isLoading.value = false
+        }
+    }
+
+    fun updateProfile(updatedWorker: Worker) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            workerRepository.saveWorkerProfile(updatedWorker).onSuccess {
+                _workerProfile.value = updatedWorker
+            }.onFailure { error ->
+                _errorMessage.value = error.message
+            }
+            _isLoading.value = false
+        }
+    }
 
     fun toggleAvailability() {
-        isAvailable = !isAvailable
+        val current = _workerProfile.value ?: return
+        updateProfile(current.copy(isAvailable = !current.isAvailable))
+    }
+
+    fun uploadProfileImage(uid: String, uri: Uri) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            storageRepository.uploadProfileImage(uid, uri).onSuccess { url ->
+                val current = _workerProfile.value ?: return@onSuccess
+                updateProfile(current.copy(profileImageUrl = url))
+            }.onFailure { error ->
+                _errorMessage.value = error.message
+            }
+            _isLoading.value = false
+        }
+    }
+
+    fun uploadGalleryImage(uid: String, uri: Uri) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            storageRepository.uploadGalleryImage(uid, uri).onSuccess { url ->
+                val current = _workerProfile.value ?: return@onSuccess
+                val newGallery = current.galleryImages + url
+                updateProfile(current.copy(galleryImages = newGallery))
+            }.onFailure { error ->
+                _errorMessage.value = error.message
+            }
+            _isLoading.value = false
+        }
     }
 
     // ── Work Requests (mock data) ───────────────────────────────────
     val incomingRequests: List<WorkRequest> = listOf(
         WorkRequest(
-            id = 1,
+            id = "1",
             customerName = "Priya Sharma",
             workType = "Interior Painting",
             description = "Need full 2BHK interior painting with premium emulsion paint",
@@ -104,7 +169,7 @@ class WorkerViewModel : ViewModel() {
             status = RequestStatus.PENDING
         ),
         WorkRequest(
-            id = 2,
+            id = "2",
             customerName = "Amit Patel",
             workType = "Wall Texture",
             description = "Decorative texture work for living room accent wall",
@@ -114,7 +179,7 @@ class WorkerViewModel : ViewModel() {
             status = RequestStatus.PENDING
         ),
         WorkRequest(
-            id = 3,
+            id = "3",
             customerName = "Deepa Nair",
             workType = "Exterior Painting",
             description = "Complete exterior painting for 2-story building with weather-proof paint",
@@ -125,20 +190,20 @@ class WorkerViewModel : ViewModel() {
         )
     )
 
-    var requestStatuses by mutableStateOf<Map<Int, RequestStatus>>(
+    var requestStatuses by mutableStateOf<Map<String, RequestStatus>>(
         incomingRequests.associate { it.id to it.status }
     )
         private set
 
-    fun acceptRequest(requestId: Int) {
+    fun acceptRequest(requestId: String) {
         requestStatuses = requestStatuses + (requestId to RequestStatus.ACCEPTED)
     }
 
-    fun rejectRequest(requestId: Int) {
+    fun rejectRequest(requestId: String) {
         requestStatuses = requestStatuses + (requestId to RequestStatus.REJECTED)
     }
 
-    fun getRequestStatus(requestId: Int): RequestStatus {
+    fun getRequestStatus(requestId: String): RequestStatus {
         return requestStatuses[requestId] ?: RequestStatus.PENDING
     }
 

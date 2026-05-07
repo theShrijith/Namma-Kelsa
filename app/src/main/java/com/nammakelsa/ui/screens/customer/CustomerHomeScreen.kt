@@ -37,8 +37,8 @@ fun CustomerHomeScreen(
     totalWorkersCount: Int,
     onWorkerClick: (Worker) -> Unit,
     onSearchClick: () -> Unit,
-    isWorkerSaved: (Int) -> Boolean,
-    onToggleSave: (Int) -> Unit,
+    isWorkerSaved: (String) -> Boolean,
+    onToggleSave: (String) -> Unit,
     onNotificationsClick: () -> Unit
 ) {
     val spacing = LocalSpacing.current

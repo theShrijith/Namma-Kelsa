@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -69,6 +70,13 @@ dependencies {
 
     // Compose Foundation (includes FlowRow)
     implementation("androidx.compose.foundation:foundation")
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")

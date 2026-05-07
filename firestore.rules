@@ -1,0 +1,81 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ── Helper Functions ───────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    // ── Default Deny ───────────────────────────────────────────────
+    // Denies all unspecified access by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ── Users Collection ───────────────────────────────────────────
+    match /users/{userId} {
+      // Users can only read and write their own role/user document
+      allow read, write: if isOwner(userId);
+    }
+
+    // ── Customers Collection ───────────────────────────────────────
+    match /customers/{customerId} {
+      // Customers can only read and edit their own profile
+      allow read, write: if isOwner(customerId);
+    }
+
+    // ── Workers Collection ─────────────────────────────────────────
+    match /workers/{workerId} {
+      // Any authenticated user (including customers) can read worker profiles
+      allow read: if isAuthenticated();
+      
+      // Workers can only edit their own profile documents
+      allow create, update, delete: if isOwner(workerId);
+    }
+
+    // ── Requests Collection ────────────────────────────────────────
+    match /requests/{requestId} {
+      // Customers and assigned workers can read the request
+      allow read: if isAuthenticated() && 
+                  (resource.data.customerId == request.auth.uid || 
+                   resource.data.workerId == request.auth.uid);
+      
+      // Only customers can create a request, and they must set themselves as the customerId
+      allow create: if isAuthenticated() && 
+                    request.resource.data.customerId == request.auth.uid;
+      
+      // Workers can update the request (e.g., status) if it's assigned to them.
+      // Customers can also update their own requests.
+      allow update: if isAuthenticated() && 
+                    (resource.data.workerId == request.auth.uid || 
+                     resource.data.customerId == request.auth.uid);
+                     
+      // Only customers can delete their own requests
+      allow delete: if isAuthenticated() && 
+                    resource.data.customerId == request.auth.uid;
+    }
+
+    // ── Notifications Collection ───────────────────────────────────
+    match /notifications/{notificationId} {
+      // Users can read and delete their own notifications
+      allow read, delete: if isAuthenticated() && 
+                          resource.data.userId == request.auth.uid;
+      
+      // System or users can create notifications assigned to themselves
+      // (If a server function creates them using Admin SDK, these rules are bypassed)
+      allow create: if isAuthenticated() && 
+                    request.resource.data.userId == request.auth.uid;
+                    
+      // Users can update their own notifications (e.g., marking as read)
+      allow update: if isAuthenticated() && 
+                    resource.data.userId == request.auth.uid && 
+                    request.resource.data.userId == request.auth.uid;
+    }
+  }
+}

@@ -23,8 +23,10 @@ import com.nammakelsa.ui.screens.customer.*
 import com.nammakelsa.ui.screens.worker.*
 import com.nammakelsa.ui.theme.LocalSpacing
 import com.nammakelsa.viewmodel.AppViewModel
+import com.nammakelsa.viewmodel.AuthViewModel
 import com.nammakelsa.viewmodel.CustomerViewModel
 import com.nammakelsa.viewmodel.WorkerViewModel
+import com.nammakelsa.data.UserRole
 
 // ── Bottom Nav Items ────────────────────────────────────────────────
 
@@ -67,8 +69,12 @@ private val workerBottomBarRoutes = setOf(
 @Composable
 fun AppNavigation(viewModel: AppViewModel = viewModel()) {
     val navController = rememberNavController()
+    val authViewModel: AuthViewModel = viewModel()
     val customerViewModel: CustomerViewModel = viewModel()
     val workerViewModel: WorkerViewModel = viewModel()
+
+    val workers by customerViewModel.workers.collectAsState()
+    val workerProfile by workerViewModel.workerProfile.collectAsState()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -131,8 +137,22 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
             composable(Screen.Splash.route) {
                 SplashScreen(
                     onNavigateToRoleSelection = {
-                        navController.navigate(Screen.RoleSelection.route) {
-                            popUpTo(Screen.Splash.route) { inclusive = true }
+                        val user = authViewModel.currentUser
+                        if (user != null) {
+                            if (user.role == UserRole.CUSTOMER) {
+                                navController.navigate(Screen.CustomerHome.route) {
+                                    popUpTo(Screen.Splash.route) { inclusive = true }
+                                }
+                            } else {
+                                workerViewModel.loadProfile(user.uid)
+                                navController.navigate(Screen.WorkerRequests.route) {
+                                    popUpTo(Screen.Splash.route) { inclusive = true }
+                                }
+                            }
+                        } else {
+                            navController.navigate(Screen.RoleSelection.route) {
+                                popUpTo(Screen.Splash.route) { inclusive = true }
+                            }
                         }
                     }
                 )
@@ -185,9 +205,22 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                     password = customerViewModel.loginPassword,
                     onPasswordChange = customerViewModel::onLoginPasswordChange,
                     onContinueClick = {
-                        showSnackbar("Welcome back!")
-                        navController.navigate(Screen.CustomerHome.route) {
-                            popUpTo(Screen.RoleSelection.route) { inclusive = true }
+                        authViewModel.login(customerViewModel.loginEmail, customerViewModel.loginPassword) { user ->
+                            if (user != null) {
+                                showSnackbar("Welcome back!")
+                                if (user.role == UserRole.CUSTOMER) {
+                                    navController.navigate(Screen.CustomerHome.route) {
+                                        popUpTo(Screen.RoleSelection.route) { inclusive = true }
+                                    }
+                                } else {
+                                    workerViewModel.loadProfile(user.uid)
+                                    navController.navigate(Screen.WorkerRequests.route) {
+                                        popUpTo(Screen.RoleSelection.route) { inclusive = true }
+                                    }
+                                }
+                            } else {
+                                showSnackbar(authViewModel.errorMessage ?: "Login failed")
+                            }
                         }
                     },
                     onRegisterClick = {
@@ -211,9 +244,20 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                     confirmPassword = customerViewModel.registerConfirmPassword,
                     onConfirmPasswordChange = customerViewModel::onRegisterConfirmPasswordChange,
                     onRegisterClick = {
-                        showSnackbar("Account created successfully")
-                        navController.navigate(Screen.CustomerHome.route) {
-                            popUpTo(Screen.RoleSelection.route) { inclusive = true }
+                        authViewModel.registerCustomer(
+                            email = customerViewModel.registerEmail,
+                            password = customerViewModel.registerPassword,
+                            name = customerViewModel.registerName,
+                            phone = customerViewModel.registerPhone
+                        ) { success ->
+                            if (success) {
+                                showSnackbar("Account created successfully")
+                                navController.navigate(Screen.CustomerHome.route) {
+                                    popUpTo(Screen.RoleSelection.route) { inclusive = true }
+                                }
+                            } else {
+                                showSnackbar(authViewModel.errorMessage ?: "Registration failed")
+                            }
                         }
                     },
                     onLoginClick = { navController.popBackStack() },
@@ -231,7 +275,7 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                     onFilterSelected = customerViewModel::onFilterSelected,
                     nearbyWorkers = customerViewModel.nearbyWorkers,
                     popularWorkers = customerViewModel.popularWorkers,
-                    totalWorkersCount = customerViewModel.sampleWorkers.size,
+                    totalWorkersCount = customerViewModel.workers.value.size,
                     onWorkerClick = { worker ->
                         navController.navigate(Screen.WorkerDetail.createRoute(worker.id))
                     },
@@ -287,9 +331,11 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                         navController.navigate(Screen.Settings.route)
                     },
                     onLogoutClick = {
-                        showSnackbar("Logged out successfully")
-                        navController.navigate(Screen.RoleSelection.route) {
-                            popUpTo(0) { inclusive = true }
+                        authViewModel.logout {
+                            showSnackbar("Logged out successfully")
+                            navController.navigate(Screen.RoleSelection.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
                         }
                     }
                 )
@@ -298,9 +344,9 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
             // ── Worker Detail (from Customer) ──────────────────────
             composable(
                 route = Screen.WorkerDetail.route,
-                arguments = listOf(navArgument("workerId") { type = NavType.IntType })
+                arguments = listOf(navArgument("workerId") { type = NavType.StringType })
             ) { backStackEntry ->
-                val workerId = backStackEntry.arguments?.getInt("workerId") ?: 0
+                val workerId = backStackEntry.arguments?.getString("workerId") ?: ""
                 val worker = customerViewModel.getWorkerById(workerId)
                 if (worker != null) {
                     WorkerDetailScreen(
@@ -320,9 +366,9 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
             // ── Send Work Request ───────────────────────────────────
             composable(
                 route = Screen.SendWorkRequest.route,
-                arguments = listOf(navArgument("workerId") { type = NavType.IntType })
+                arguments = listOf(navArgument("workerId") { type = NavType.StringType })
             ) { backStackEntry ->
-                val workerId = backStackEntry.arguments?.getInt("workerId") ?: 0
+                val workerId = backStackEntry.arguments?.getString("workerId") ?: ""
                 val worker = customerViewModel.getWorkerById(workerId)
                 SendWorkRequestScreen(
                     workerName = worker?.name ?: "Worker",
@@ -353,14 +399,27 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
             // ── Worker Login ────────────────────────────────────────
             composable(Screen.WorkerLogin.route) {
                 WorkerLoginScreen(
-                    workerId = workerViewModel.loginWorkerId,
-                    onWorkerIdChange = workerViewModel::onLoginWorkerIdChange,
+                    email = workerViewModel.loginEmail,
+                    onEmailChange = workerViewModel::onLoginEmailChange,
                     password = workerViewModel.loginPassword,
                     onPasswordChange = workerViewModel::onLoginPasswordChange,
                     onContinueClick = {
-                        showSnackbar("Welcome back!")
-                        navController.navigate(Screen.WorkerRequests.route) {
-                            popUpTo(Screen.RoleSelection.route) { inclusive = true }
+                        authViewModel.login(workerViewModel.loginEmail, workerViewModel.loginPassword) { user ->
+                            if (user != null) {
+                                showSnackbar("Welcome back!")
+                                if (user.role == UserRole.WORKER) {
+                                    workerViewModel.loadProfile(user.uid)
+                                    navController.navigate(Screen.WorkerRequests.route) {
+                                        popUpTo(Screen.RoleSelection.route) { inclusive = true }
+                                    }
+                                } else {
+                                    navController.navigate(Screen.CustomerHome.route) {
+                                        popUpTo(Screen.RoleSelection.route) { inclusive = true }
+                                    }
+                                }
+                            } else {
+                                showSnackbar(authViewModel.errorMessage ?: "Login failed")
+                            }
                         }
                     },
                     onRegisterClick = {
@@ -377,6 +436,8 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                     onNameChange = workerViewModel::onRegisterNameChange,
                     phone = workerViewModel.registerPhone,
                     onPhoneChange = workerViewModel::onRegisterPhoneChange,
+                    email = workerViewModel.registerEmail,
+                    onEmailChange = workerViewModel::onRegisterEmailChange,
                     password = workerViewModel.registerPassword,
                     onPasswordChange = workerViewModel::onRegisterPasswordChange,
                     location = workerViewModel.registerLocation,
@@ -388,8 +449,23 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                     isComplete = workerViewModel.registrationComplete,
                     generatedWorkerId = workerViewModel.generatedWorkerId,
                     onRegisterClick = { 
-                        workerViewModel.completeRegistration()
-                        showSnackbar("Registration successful!")
+                        val skill = workerViewModel.registerSelectedSkills.firstOrNull() ?: ""
+                        authViewModel.registerWorker(
+                            email = workerViewModel.registerEmail,
+                            password = workerViewModel.registerPassword,
+                            name = workerViewModel.registerName,
+                            phone = workerViewModel.registerPhone,
+                            skill = skill,
+                            location = workerViewModel.registerLocation,
+                            dailyRate = workerViewModel.registerDailyRate.toIntOrNull() ?: 0
+                        ) { success ->
+                            if (success) {
+                                workerViewModel.completeRegistration()
+                                showSnackbar("Registration successful!")
+                            } else {
+                                showSnackbar(authViewModel.errorMessage ?: "Registration failed")
+                            }
+                        }
                     },
                     onContinueClick = {
                         workerViewModel.resetRegistration()
@@ -426,10 +502,10 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
             // ── Worker Availability ─────────────────────────────────
             composable(Screen.WorkerAvailability.route) {
                 WorkerAvailabilityScreen(
-                    isAvailable = workerViewModel.isAvailable,
+                    isAvailable = workerProfile?.isAvailable ?: false,
                     onToggle = {
                         workerViewModel.toggleAvailability()
-                        showSnackbar(if (workerViewModel.isAvailable) "You are now online" else "You are now offline")
+                        showSnackbar(if (workerProfile?.isAvailable == false) "You are now online" else "You are now offline")
                     },
                     pendingRequests = workerViewModel.pendingRequestsCount,
                     acceptedJobs = workerViewModel.acceptedJobsCount
@@ -439,10 +515,12 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
             // ── Worker Profile ──────────────────────────────────────
             composable(Screen.WorkerProfile.route) {
                 WorkerProfileScreen(
-                    workerName = workerViewModel.workerName,
-                    workerId = workerViewModel.workerId,
-                    workerSkill = workerViewModel.workerSkill,
-                    workerDailyRate = workerViewModel.workerDailyRate,
+                    workerName = workerProfile?.name ?: "",
+                    workerId = workerProfile?.workerId ?: "",
+                    workerSkill = workerProfile?.skill ?: "",
+                    workerDailyRate = workerProfile?.dailyRate?.toString() ?: "",
+                    profileImageUrl = workerProfile?.profileImageUrl,
+                    galleryImages = workerProfile?.galleryImages ?: emptyList(),
                     isDarkMode = viewModel.isDarkMode,
                     onDarkModeToggle = { 
                         viewModel.updateDarkMode(it)
@@ -455,10 +533,22 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                         navController.navigate(Screen.Settings.route)
                     },
                     onLogoutClick = {
-                        showSnackbar("Logged out successfully")
-                        navController.navigate(Screen.RoleSelection.route) {
-                            popUpTo(0) { inclusive = true }
+                        authViewModel.logout {
+                            showSnackbar("Logged out successfully")
+                            navController.navigate(Screen.RoleSelection.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
                         }
+                    },
+                    onUploadProfileImage = { uri ->
+                        val uid = authViewModel.currentUser?.uid ?: return@WorkerProfileScreen
+                        workerViewModel.uploadProfileImage(uid, uri)
+                        showSnackbar("Uploading profile image...")
+                    },
+                    onUploadGalleryImage = { uri ->
+                        val uid = authViewModel.currentUser?.uid ?: return@WorkerProfileScreen
+                        workerViewModel.uploadGalleryImage(uid, uri)
+                        showSnackbar("Uploading gallery image...")
                     }
                 )
             }

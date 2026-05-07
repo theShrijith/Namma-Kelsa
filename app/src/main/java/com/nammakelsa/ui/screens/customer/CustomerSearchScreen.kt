@@ -32,8 +32,8 @@ fun CustomerSearchScreen(
     onFilterSelected: (String?) -> Unit,
     workers: List<Worker>,
     onWorkerClick: (Worker) -> Unit,
-    isWorkerSaved: (Int) -> Boolean,
-    onToggleSave: (Int) -> Unit
+    isWorkerSaved: (String) -> Boolean,
+    onToggleSave: (String) -> Unit
 ) {
     val spacing = LocalSpacing.current
 

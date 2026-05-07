@@ -1,0 +1,39 @@
+rules_version = '2';
+
+// Craft rules based on the provided project ID.
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Default deny
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // Profile Images
+    match /profile_images/{userId}/{fileName} {
+      // Anyone authenticated can read profile images
+      allow read: if isAuthenticated();
+      // Users can only upload their own profile image
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Also support root level profile_images/uid.jpg if needed
+    match /profile_images/{fileName} {
+      allow read: if isAuthenticated();
+      // Allow if filename is their uid + .jpg
+      allow write: if isAuthenticated() && fileName == request.auth.uid + '.jpg';
+    }
+
+    // Gallery Images
+    match /gallery_images/{workerId}/{fileName} {
+      // Anyone authenticated can view work galleries
+      allow read: if isAuthenticated();
+      // Workers can only upload to their own gallery folder
+      allow write: if isAuthenticated() && request.auth.uid == workerId;
+    }
+  }
+}

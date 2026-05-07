@@ -29,8 +29,8 @@ import com.nammakelsa.ui.theme.*
 
 @Composable
 fun WorkerLoginScreen(
-    workerId: String,
-    onWorkerIdChange: (String) -> Unit,
+    email: String,
+    onEmailChange: (String) -> Unit,
     password: String,
     onPasswordChange: (String) -> Unit,
     onContinueClick: () -> Unit,
@@ -135,7 +135,7 @@ fun WorkerLoginScreen(
             Spacer(modifier = Modifier.height(spacing.xs))
 
             Text(
-                text = "Sign in with your Worker ID",
+                text = "Sign in with your Email Address",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -143,12 +143,12 @@ fun WorkerLoginScreen(
 
             Spacer(modifier = Modifier.height(spacing.lg))
 
-            // Worker ID input
+            // Email input
             AppTextField(
-                value = workerId,
-                onValueChange = onWorkerIdChange,
-                label = "Worker ID (e.g. NK-WRK-2041)",
-                leadingIcon = Icons.Default.Badge
+                value = email,
+                onValueChange = onEmailChange,
+                label = "Email Address",
+                leadingIcon = Icons.Default.Email
             )
 
             Spacer(modifier = Modifier.height(spacing.sm))
@@ -173,7 +173,7 @@ fun WorkerLoginScreen(
             Spacer(modifier = Modifier.height(spacing.xs))
 
             Text(
-                text = "Forgot Worker ID?",
+                text = "Forgot Password?",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold,
@@ -188,10 +188,10 @@ fun WorkerLoginScreen(
             PrimaryButton(
                 text = "Sign In",
                 onClick = {
-                    if (workerId.isNotBlank() && password.isNotBlank()) {
+                    if (email.isNotBlank() && password.isNotBlank()) {
                         onContinueClick()
                     } else {
-                        onShowSnackbar("Please enter your Worker ID and password")
+                        onShowSnackbar("Please enter your email and password")
                     }
                 },
                 enabled = true
