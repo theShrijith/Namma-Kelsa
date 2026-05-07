@@ -34,7 +34,7 @@ fun NotificationsScreen(
         mutableStateOf(
             listOf(
                 Notification(
-                    id = 1,
+                    id = "1",
                     title = "Work Request Accepted",
                     message = "Raju Kumar has accepted your interior painting request.",
                     timestamp = "10 mins ago",
@@ -42,7 +42,7 @@ fun NotificationsScreen(
                     type = NotificationType.SUCCESS
                 ),
                 Notification(
-                    id = 2,
+                    id = "2",
                     title = "Profile Updated",
                     message = "Your profile information was updated successfully.",
                     timestamp = "2 hours ago",
@@ -50,7 +50,7 @@ fun NotificationsScreen(
                     type = NotificationType.INFO
                 ),
                 Notification(
-                    id = 3,
+                    id = "3",
                     title = "New Message",
                     message = "Suresh Gowda sent you a message regarding your plumbing request.",
                     timestamp = "1 day ago",
@@ -58,7 +58,7 @@ fun NotificationsScreen(
                     type = NotificationType.INFO
                 ),
                 Notification(
-                    id = 4,
+                    id = "4",
                     title = "System Maintenance",
                     message = "App will be down for maintenance from 2 AM to 4 AM tonight.",
                     timestamp = "2 days ago",

@@ -21,7 +21,7 @@ import com.nammakelsa.ui.theme.LocalSpacing
 fun SavedWorkersScreen(
     savedWorkers: List<Worker>,
     onWorkerClick: (Worker) -> Unit,
-    onToggleSave: (Int) -> Unit
+    onToggleSave: (String) -> Unit
 ) {
     val spacing = LocalSpacing.current
 

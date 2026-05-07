@@ -21,7 +21,6 @@ import androidx.navigation.navArgument
 import com.nammakelsa.ui.screens.*
 import com.nammakelsa.ui.screens.customer.*
 import com.nammakelsa.ui.screens.worker.*
-import com.nammakelsa.ui.theme.LocalSpacing
 import com.nammakelsa.viewmodel.AppViewModel
 import com.nammakelsa.viewmodel.AuthViewModel
 import com.nammakelsa.viewmodel.CustomerViewModel
@@ -61,10 +60,6 @@ private val workerBottomBarRoutes = setOf(
     Screen.WorkerAvailability.route,
     Screen.WorkerProfile.route
 )
-
-// ═══════════════════════════════════════════════════════════════════════
-//  Main App Scaffold with role-based Nav
-// ═══════════════════════════════════════════════════════════════════════
 
 @Composable
 fun AppNavigation(viewModel: AppViewModel = viewModel()) {
@@ -129,10 +124,6 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                 bottom = if (showBottomBar) innerPadding.calculateBottomPadding() else 0.dp
             )
         ) {
-            // ═════════════════════════════════════════════════════════
-            //  Shared Screens
-            // ═════════════════════════════════════════════════════════
-
             // ── Splash ──────────────────────────────────────────────
             composable(Screen.Splash.route) {
                 SplashScreen(
@@ -174,7 +165,7 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                 )
             }
 
-            // ── Settings (Shared) ───────────────────────────────────
+            // ── Settings ────────────────────────────────────────────
             composable(Screen.Settings.route) {
                 SettingsScreen(
                     isDarkMode = viewModel.isDarkMode,
@@ -186,16 +177,12 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                 )
             }
 
-            // ── Notifications (Shared) ──────────────────────────────
+            // ── Notifications ───────────────────────────────────────
             composable(Screen.Notifications.route) {
                 NotificationsScreen(
                     onBackClick = { navController.popBackStack() }
                 )
             }
-
-            // ═════════════════════════════════════════════════════════
-            //  Customer Flow
-            // ═════════════════════════════════════════════════════════
 
             // ── Customer Login ──────────────────────────────────────
             composable(Screen.CustomerLogin.route) {
@@ -275,15 +262,15 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                     onFilterSelected = customerViewModel::onFilterSelected,
                     nearbyWorkers = customerViewModel.nearbyWorkers,
                     popularWorkers = customerViewModel.popularWorkers,
-                    totalWorkersCount = customerViewModel.workers.value.size,
+                    totalWorkersCount = workers.size,
                     onWorkerClick = { worker ->
                         navController.navigate(Screen.WorkerDetail.createRoute(worker.id))
                     },
                     onSearchClick = {
                         navController.navigate(Screen.CustomerSearch.route)
                     },
-                    isWorkerSaved = customerViewModel::isWorkerSaved,
-                    onToggleSave = customerViewModel::toggleSaveWorker,
+                    isWorkerSaved = { customerViewModel.isWorkerSaved(it) },
+                    onToggleSave = { customerViewModel.toggleSaveWorker(it) },
                     onNotificationsClick = {
                         navController.navigate(Screen.Notifications.route)
                     }
@@ -301,8 +288,8 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                     onWorkerClick = { worker ->
                         navController.navigate(Screen.WorkerDetail.createRoute(worker.id))
                     },
-                    isWorkerSaved = customerViewModel::isWorkerSaved,
-                    onToggleSave = customerViewModel::toggleSaveWorker
+                    isWorkerSaved = { customerViewModel.isWorkerSaved(it) },
+                    onToggleSave = { customerViewModel.toggleSaveWorker(it) }
                 )
             }
 
@@ -313,7 +300,7 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                     onWorkerClick = { worker ->
                         navController.navigate(Screen.WorkerDetail.createRoute(worker.id))
                     },
-                    onToggleSave = customerViewModel::toggleSaveWorker
+                    onToggleSave = { customerViewModel.toggleSaveWorker(it) }
                 )
             }
 
@@ -341,7 +328,7 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                 )
             }
 
-            // ── Worker Detail (from Customer) ──────────────────────
+            // ── Worker Detail ───────────────────────────────────────
             composable(
                 route = Screen.WorkerDetail.route,
                 arguments = listOf(navArgument("workerId") { type = NavType.StringType })
@@ -391,10 +378,6 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
                     onShowSnackbar = showSnackbar
                 )
             }
-
-            // ═════════════════════════════════════════════════════════
-            //  Worker Flow
-            // ═════════════════════════════════════════════════════════
 
             // ── Worker Login ────────────────────────────────────────
             composable(Screen.WorkerLogin.route) {
@@ -482,7 +465,7 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
             composable(Screen.WorkerRequests.route) {
                 WorkerRequestsScreen(
                     requests = workerViewModel.incomingRequests,
-                    getStatus = workerViewModel::getRequestStatus,
+                    getStatus = { workerViewModel.getRequestStatus(it) },
                     onAccept = {
                         workerViewModel.acceptRequest(it)
                         showSnackbar("Work request accepted")
@@ -555,10 +538,6 @@ fun AppNavigation(viewModel: AppViewModel = viewModel()) {
         }
     }
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-//  Bottom Navigation Bar (reusable for both roles)
-// ═══════════════════════════════════════════════════════════════════════
 
 @Composable
 fun AppBottomBar(

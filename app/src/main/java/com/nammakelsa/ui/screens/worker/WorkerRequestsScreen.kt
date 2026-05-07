@@ -24,9 +24,9 @@ import com.nammakelsa.ui.theme.*
 @Composable
 fun WorkerRequestsScreen(
     requests: List<WorkRequest>,
-    getStatus: (Int) -> RequestStatus,
-    onAccept: (Int) -> Unit,
-    onReject: (Int) -> Unit,
+    getStatus: (String) -> RequestStatus,
+    onAccept: (String) -> Unit,
+    onReject: (String) -> Unit,
     pendingCount: Int,
     acceptedCount: Int,
     onNotificationsClick: () -> Unit

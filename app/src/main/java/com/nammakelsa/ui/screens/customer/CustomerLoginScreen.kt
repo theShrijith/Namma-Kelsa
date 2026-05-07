@@ -148,11 +148,11 @@ fun CustomerLoginScreen(
 
             Spacer(modifier = Modifier.height(spacing.lg))
 
-            // Email / Phone input
+            // Email input
             AppTextField(
                 value = email,
                 onValueChange = onEmailChange,
-                label = "Email or Phone Number",
+                label = "Email Address",
                 leadingIcon = Icons.Default.Email
             )
 

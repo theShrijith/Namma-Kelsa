@@ -20,10 +20,10 @@ sealed class Screen(val route: String) {
     object SavedWorkers     : Screen("saved_workers")
     object CustomerProfile  : Screen("customer_profile")
     object SendWorkRequest  : Screen("send_work_request/{workerId}") {
-        fun createRoute(workerId: Int) = "send_work_request/$workerId"
+        fun createRoute(workerId: String) = "send_work_request/$workerId"
     }
     object WorkerDetail     : Screen("worker_detail/{workerId}") {
-        fun createRoute(workerId: Int) = "worker_detail/$workerId"
+        fun createRoute(workerId: String) = "worker_detail/$workerId"
     }
 
     // ── Worker Flow ─────────────────────────────────────────────────
