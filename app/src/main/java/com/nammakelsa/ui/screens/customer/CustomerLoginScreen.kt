@@ -43,7 +43,8 @@ fun CustomerLoginScreen(
     onPasswordChange: (String) -> Unit,
     onContinueClick: () -> Unit,
     onRegisterClick: () -> Unit,
-    onShowSnackbar: (String) -> Unit
+    onShowSnackbar: (String) -> Unit,
+    isLoading: Boolean
 ) {
     val spacing = LocalSpacing.current
     var passwordVisible by remember { mutableStateOf(false) }
@@ -164,6 +165,8 @@ fun CustomerLoginScreen(
                 onValueChange = onPasswordChange,
                 label = "Password",
                 leadingIcon = Icons.Default.Lock,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
@@ -187,7 +190,7 @@ fun CustomerLoginScreen(
                         onShowSnackbar("Please enter your email and password")
                     }
                 },
-                enabled = true
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(spacing.sm))

@@ -22,14 +22,14 @@ import kotlinx.coroutines.launch
 
 /**
  * ViewModel for Worker-specific UI state.
- * Manages availability, requests, profile, and registration.
+ * Manages availability, requests, profile, and registration form fields.
  */
 class WorkerViewModel(
     private val workerRepository: WorkerRepository = WorkerRepositoryImpl(),
     private val storageRepository: StorageRepository = StorageRepositoryImpl()
 ) : ViewModel() {
 
-    // ── Auth State ──────────────────────────────────────────────────
+    // ── Login Form Fields ────────────────────────────────────────────────────
     var loginEmail by mutableStateOf("")
         private set
     var loginPassword by mutableStateOf("")
@@ -38,7 +38,7 @@ class WorkerViewModel(
     fun onLoginEmailChange(value: String) { loginEmail = value }
     fun onLoginPasswordChange(value: String) { loginPassword = value }
 
-    // ── Registration State ──────────────────────────────────────────
+    // ── Registration Form Fields ─────────────────────────────────────────────
     var registerName by mutableStateOf("")
         private set
     var registerPhone by mutableStateOf("")
@@ -52,10 +52,6 @@ class WorkerViewModel(
     var registerDailyRate by mutableStateOf("")
         private set
     var registerSelectedSkills by mutableStateOf<Set<String>>(emptySet())
-        private set
-    var registrationComplete by mutableStateOf(false)
-        private set
-    var generatedWorkerId by mutableStateOf("")
         private set
 
     fun onRegisterNameChange(value: String) { registerName = value }
@@ -73,12 +69,6 @@ class WorkerViewModel(
         }
     }
 
-    fun completeRegistration() {
-        val randomSuffix = (2000..9999).random()
-        generatedWorkerId = "NK-WRK-$randomSuffix"
-        registrationComplete = true
-    }
-
     fun resetRegistration() {
         registerName = ""
         registerPhone = ""
@@ -86,11 +76,18 @@ class WorkerViewModel(
         registerLocation = ""
         registerDailyRate = ""
         registerSelectedSkills = emptySet()
-        registrationComplete = false
-        generatedWorkerId = ""
     }
 
-    // ── Worker Profile (Firestore via StateFlow) ────────────────────
+    // ── Clear all state on logout ────────────────────────────────────────────
+    fun clearState() {
+        loginEmail = ""
+        loginPassword = ""
+        resetRegistration()
+        _workerProfile.value = null
+        requestStatuses = incomingRequests.associate { it.id to it.status }
+    }
+
+    // ── Worker Profile (Firestore via StateFlow) ─────────────────────────────
     private val _workerProfile = MutableStateFlow<Worker?>(null)
     val workerProfile: StateFlow<Worker?> = _workerProfile.asStateFlow()
 
@@ -158,37 +155,37 @@ class WorkerViewModel(
         }
     }
 
-    // ── Work Requests (mock data) ───────────────────────────────────
+    // ── Work Requests (mock data for now) ────────────────────────────────────
     val incomingRequests: List<WorkRequest> = listOf(
         WorkRequest(
-            id = "1",
+            id           = "1",
             customerName = "Priya Sharma",
-            workType = "Interior Painting",
-            description = "Need full 2BHK interior painting with premium emulsion paint",
-            location = "Koramangala, Bangalore",
-            date = "May 12, 2026",
-            budget = "₹15,000",
-            status = RequestStatus.PENDING
+            workType     = "Interior Painting",
+            description  = "Need full 2BHK interior painting with premium emulsion paint",
+            location     = "Koramangala, Bangalore",
+            date         = "May 12, 2026",
+            budget       = "₹15,000",
+            status       = RequestStatus.PENDING
         ),
         WorkRequest(
-            id = "2",
+            id           = "2",
             customerName = "Amit Patel",
-            workType = "Wall Texture",
-            description = "Decorative texture work for living room accent wall",
-            location = "Indiranagar, Bangalore",
-            date = "May 15, 2026",
-            budget = "₹8,000",
-            status = RequestStatus.PENDING
+            workType     = "Wall Texture",
+            description  = "Decorative texture work for living room accent wall",
+            location     = "Indiranagar, Bangalore",
+            date         = "May 15, 2026",
+            budget       = "₹8,000",
+            status       = RequestStatus.PENDING
         ),
         WorkRequest(
-            id = "3",
+            id           = "3",
             customerName = "Deepa Nair",
-            workType = "Exterior Painting",
-            description = "Complete exterior painting for 2-story building with weather-proof paint",
-            location = "HSR Layout, Bangalore",
-            date = "May 20, 2026",
-            budget = "₹25,000",
-            status = RequestStatus.ACCEPTED
+            workType     = "Exterior Painting",
+            description  = "Complete exterior painting for 2-story building with weather-proof paint",
+            location     = "HSR Layout, Bangalore",
+            date         = "May 20, 2026",
+            budget       = "₹25,000",
+            status       = RequestStatus.ACCEPTED
         )
     )
 
@@ -209,11 +206,11 @@ class WorkerViewModel(
         return requestStatuses[requestId] ?: RequestStatus.PENDING
     }
 
-    /** Today's pending requests count */
+    /** Today's pending requests count. */
     val pendingRequestsCount: Int
         get() = requestStatuses.count { it.value == RequestStatus.PENDING }
 
-    /** Accepted jobs count */
+    /** Accepted jobs count. */
     val acceptedJobsCount: Int
         get() = requestStatuses.count { it.value == RequestStatus.ACCEPTED }
 }

@@ -203,7 +203,9 @@ fun AppTextField(
     trailingIcon: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
     errorMessage: String? = null,
-    singleLine: Boolean = true
+    singleLine: Boolean = true,
+    visualTransformation: androidx.compose.ui.text.input.VisualTransformation = androidx.compose.ui.text.input.VisualTransformation.None,
+    keyboardOptions: androidx.compose.foundation.text.KeyboardOptions = androidx.compose.foundation.text.KeyboardOptions.Default
 ) {
     val spacing = LocalSpacing.current
 
@@ -214,6 +216,8 @@ fun AppTextField(
             label = { Text(label) },
             singleLine = singleLine,
             isError = isError,
+            visualTransformation = visualTransformation,
+            keyboardOptions = keyboardOptions,
             leadingIcon = if (leadingIcon != null) {
                 {
                     Icon(

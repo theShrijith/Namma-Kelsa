@@ -86,12 +86,20 @@ fun CustomerHomeScreen(
                             color = Color.White.copy(alpha = 0.85f)
                         )
                         Spacer(modifier = Modifier.height(spacing.xxs))
-                        Text(
-                            text = customerName.ifBlank { "Customer" },
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
+                        if (customerName.isBlank()) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = customerName,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
                     }
                     IconButton(onClick = onNotificationsClick) {
                         Icon(

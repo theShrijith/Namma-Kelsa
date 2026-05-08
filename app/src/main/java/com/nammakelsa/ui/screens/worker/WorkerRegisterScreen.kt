@@ -21,6 +21,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,6 +50,7 @@ fun WorkerRegisterScreen(
     selectedSkills: Set<String>,
     onSkillToggle: (String) -> Unit,
     isComplete: Boolean,
+    isLoading: Boolean,
     generatedWorkerId: String,
     onRegisterClick: () -> Unit,
     onContinueClick: () -> Unit,
@@ -53,6 +58,7 @@ fun WorkerRegisterScreen(
     onShowSnackbar: (String) -> Unit
 ) {
     val spacing = LocalSpacing.current
+    var passwordVisible by remember { mutableStateOf(false) }
 
     val formValid = name.isNotBlank() && phone.length == 10 && email.isNotBlank() &&
             password.length >= 6 && selectedSkills.isNotEmpty() &&
@@ -151,7 +157,7 @@ fun WorkerRegisterScreen(
                     Spacer(modifier = Modifier.height(spacing.lg))
 
                     PrimaryButton(
-                        text = "Continue to Login",
+                        text = "Continue to Dashboard",
                         onClick = onContinueClick,
                         icon = Icons.Default.ArrowForward
                     )
@@ -269,7 +275,18 @@ fun WorkerRegisterScreen(
                         value = password,
                         onValueChange = onPasswordChange,
                         label = "Password",
-                        leadingIcon = Icons.Default.Lock
+                        leadingIcon = Icons.Default.Lock,
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        trailingIcon = {
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(
+                                    imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                    contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(spacing.sm))
@@ -365,7 +382,7 @@ fun WorkerRegisterScreen(
                             }
                         },
                         icon = Icons.Default.Check,
-                        enabled = true
+                        enabled = !isLoading
                     )
 
                     Spacer(modifier = Modifier.height(spacing.sm))

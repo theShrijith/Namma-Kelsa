@@ -9,8 +9,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.DarkMode
-import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -22,16 +20,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nammakelsa.ui.components.PrimaryButton
-import com.nammakelsa.ui.components.SecondaryButton
 import com.nammakelsa.ui.theme.*
 
 @Composable
 fun CustomerProfileScreen(
     customerName: String,
     customerPhone: String,
-    isDarkMode: Boolean,
-    onDarkModeToggle: (Boolean) -> Unit,
     onSettingsClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
@@ -68,27 +62,44 @@ fun CustomerProfileScreen(
                         .border(3.dp, Color.White.copy(alpha = 0.5f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = (customerName.firstOrNull() ?: 'C').uppercase(),
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 40.sp
-                    )
+                    if (customerName.isBlank()) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = customerName.first().uppercase(),
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 40.sp
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(spacing.sm))
 
-                Text(
-                    text = customerName,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp,
-                    color = Color.White
-                )
+                if (customerName.isBlank()) {
+                    Spacer(modifier = Modifier.height(spacing.xs))
+                    LinearProgressIndicator(
+                        modifier = Modifier.width(100.dp).height(4.dp).clip(RoundedCornerShape(2.dp)),
+                        color = Color.White,
+                        trackColor = Color.White.copy(alpha = 0.3f)
+                    )
+                } else {
+                    Text(
+                        text = customerName,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp,
+                        color = Color.White
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(spacing.xxs))
 
                 Text(
-                    text = "+91 $customerPhone",
+                    text = if (customerPhone.isNotBlank()) "+91 $customerPhone" else "Phone number not added",
                     fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.8f)
                 )
@@ -105,53 +116,6 @@ fun CustomerProfileScreen(
                     vertical = spacing.md
                 )
         ) {
-            // Dark mode toggle
-            Card(
-                shape = RoundedCornerShape(spacing.cornerRadius),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                ),
-                elevation = CardDefaults.cardElevation(0.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(spacing.cardPadding),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = if (isDarkMode) Icons.Outlined.DarkMode else Icons.Outlined.LightMode,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(spacing.sm))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Dark Mode",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = if (isDarkMode) "Dark theme is active" else "Light theme is active",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = isDarkMode,
-                        onCheckedChange = onDarkModeToggle,
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary
-                        )
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(spacing.sm))
-
             // Settings button
             Card(
                 onClick = onSettingsClick,

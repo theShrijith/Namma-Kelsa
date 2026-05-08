@@ -20,8 +20,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nammakelsa.ui.theme.*
-import kotlinx.coroutines.delay
 
+/**
+ * SplashScreen — purely visual. Session routing is handled by the
+ * LaunchedEffect(authState) in NavGraph, so this screen just animates.
+ *
+ * [onNavigateToRoleSelection] is kept as a param for API compatibility
+ * but is intentionally never called from here; NavGraph owns navigation.
+ */
 @Composable
 fun SplashScreen(
     onNavigateToRoleSelection: () -> Unit
@@ -32,33 +38,32 @@ fun SplashScreen(
     var startAnimation by remember { mutableStateOf(false) }
 
     val logoScale by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0.3f,
+        targetValue  = if (startAnimation) 1f else 0.3f,
         animationSpec = tween(durationMillis = 800, easing = EaseOutBack),
-        label = "logoScale"
+        label        = "logoScale"
     )
     val logoAlpha by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0f,
+        targetValue  = if (startAnimation) 1f else 0f,
         animationSpec = tween(durationMillis = 600),
-        label = "logoAlpha"
+        label        = "logoAlpha"
     )
     val textAlpha by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0f,
+        targetValue  = if (startAnimation) 1f else 0f,
         animationSpec = tween(durationMillis = 800, delayMillis = 400),
-        label = "textAlpha"
+        label        = "textAlpha"
     )
     val taglineAlpha by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0f,
+        targetValue  = if (startAnimation) 1f else 0f,
         animationSpec = tween(durationMillis = 800, delayMillis = 700),
-        label = "taglineAlpha"
+        label        = "taglineAlpha"
     )
 
-    // Pulsing glow ring
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.15f,
+        initialValue  = 1f,
+        targetValue   = 1.15f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = EaseInOutCubic),
+            animation  = tween(1200, easing = EaseInOutCubic),
             repeatMode = RepeatMode.Reverse
         ),
         label = "pulseScale"
@@ -66,8 +71,7 @@ fun SplashScreen(
 
     LaunchedEffect(Unit) {
         startAnimation = true
-        delay(2500)
-        onNavigateToRoleSelection()
+        // No navigation here — NavGraph reacts to authState changes
     }
 
     // ── UI ──────────────────────────────────────────────────────────
@@ -85,7 +89,6 @@ fun SplashScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Pulsing ring behind the icon
             Box(contentAlignment = Alignment.Center) {
                 Box(
                     modifier = Modifier
@@ -95,8 +98,6 @@ fun SplashScreen(
                         .clip(CircleShape)
                         .background(Color.White)
                 )
-
-                // Logo icon
                 Box(
                     modifier = Modifier
                         .size(110.dp)
@@ -107,39 +108,48 @@ fun SplashScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Handyman,
+                        imageVector        = Icons.Default.Handyman,
                         contentDescription = "Namma Kelsa Logo",
-                        tint = Color.White,
-                        modifier = Modifier.size(spacing.xxxl)
+                        tint               = Color.White,
+                        modifier           = Modifier.size(spacing.xxxl)
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(spacing.lg))
 
-            // App name
             Text(
-                text = "Namma Kelsa",
-                modifier = Modifier.alpha(textAlpha),
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
+                text         = "Namma Kelsa",
+                modifier     = Modifier.alpha(textAlpha),
+                fontSize     = 36.sp,
+                fontWeight   = FontWeight.Bold,
+                color        = Color.White,
                 letterSpacing = 1.sp
             )
 
             Spacer(modifier = Modifier.height(spacing.xs + 4.dp))
 
-            // Tagline
             Text(
-                text = "Find Skilled Workers Near You",
-                modifier = Modifier
+                text          = "Find Skilled Workers Near You",
+                modifier      = Modifier
                     .alpha(taglineAlpha)
                     .padding(horizontal = spacing.xxl),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.White.copy(alpha = 0.85f),
-                textAlign = TextAlign.Center,
+                fontSize      = 16.sp,
+                fontWeight    = FontWeight.Normal,
+                color         = Color.White.copy(alpha = 0.85f),
+                textAlign     = TextAlign.Center,
                 letterSpacing = 0.5.sp
+            )
+
+            Spacer(modifier = Modifier.height(spacing.lg))
+
+            // Subtle loading indicator while session is being verified
+            CircularProgressIndicator(
+                modifier  = Modifier
+                    .size(24.dp)
+                    .alpha(taglineAlpha),
+                color     = Color.White.copy(alpha = 0.7f),
+                strokeWidth = 2.dp
             )
         }
 

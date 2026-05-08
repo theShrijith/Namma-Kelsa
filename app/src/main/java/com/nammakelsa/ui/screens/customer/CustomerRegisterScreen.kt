@@ -20,6 +20,10 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,9 +45,11 @@ fun CustomerRegisterScreen(
     onConfirmPasswordChange: (String) -> Unit,
     onRegisterClick: () -> Unit,
     onLoginClick: () -> Unit,
-    onShowSnackbar: (String) -> Unit
+    onShowSnackbar: (String) -> Unit,
+    isLoading: Boolean
 ) {
     val spacing = LocalSpacing.current
+    var passwordVisible by remember { mutableStateOf(false) }
 
     var animateIn by remember { mutableStateOf(false) }
     val contentAlpha by animateFloatAsState(
@@ -149,7 +155,18 @@ fun CustomerRegisterScreen(
                 value = password,
                 onValueChange = onPasswordChange,
                 label = "Password",
-                leadingIcon = Icons.Default.Lock
+                leadingIcon = Icons.Default.Lock,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(spacing.sm))
@@ -159,6 +176,8 @@ fun CustomerRegisterScreen(
                 onValueChange = onConfirmPasswordChange,
                 label = "Confirm Password",
                 leadingIcon = Icons.Default.Lock,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 isError = !passwordsMatch,
                 errorMessage = if (!passwordsMatch) "Passwords do not match" else null
             )
@@ -176,7 +195,7 @@ fun CustomerRegisterScreen(
                         onShowSnackbar("Please fill all fields correctly")
                     }
                 },
-                enabled = true,
+                enabled = !isLoading,
                 icon = Icons.Default.PersonAdd
             )
 

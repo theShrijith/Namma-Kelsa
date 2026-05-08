@@ -12,8 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.DarkMode
-import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -33,13 +31,13 @@ import com.nammakelsa.ui.theme.*
 @Composable
 fun WorkerProfileScreen(
     workerName: String,
+    workerPhone: String,
+    workerEmail: String,
     workerId: String,
     workerSkill: String,
     workerDailyRate: String,
     profileImageUrl: String?,
     galleryImages: List<String>,
-    isDarkMode: Boolean,
-    onDarkModeToggle: (Boolean) -> Unit,
     onEditProfileClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onLogoutClick: () -> Unit,
@@ -104,23 +102,51 @@ fun WorkerProfileScreen(
                             fontSize = 20.sp
                         )
                     } else {
-                        Text(
-                            text = (workerName.firstOrNull() ?: 'W').uppercase(),
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 40.sp
-                        )
+                        if (workerName.isBlank()) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = workerName.first().uppercase(),
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 40.sp
+                            )
+                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(spacing.sm))
 
-                Text(
-                    text = workerName,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp,
-                    color = Color.White
-                )
+                if (workerName.isBlank()) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.width(100.dp).height(4.dp).clip(RoundedCornerShape(2.dp)),
+                        color = Color.White,
+                        trackColor = Color.White.copy(alpha = 0.3f)
+                    )
+                } else {
+                    Text(
+                        text = workerName,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(spacing.xxs))
+                    Text(
+                        text = workerEmail,
+                        fontSize = 14.sp,
+                        color = Color.White.copy(alpha = 0.8f)
+                    )
+                    Spacer(modifier = Modifier.height(spacing.xxs))
+                    Text(
+                        text = if (workerPhone.isNotBlank()) "+91 $workerPhone" else "Phone number not added",
+                        fontSize = 14.sp,
+                        color = Color.White.copy(alpha = 0.8f)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(spacing.xxs))
 
@@ -258,52 +284,6 @@ fun WorkerProfileScreen(
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(spacing.sm))
-
-            // Dark mode toggle
-            Card(
-                shape = RoundedCornerShape(spacing.cornerRadius),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                ),
-                elevation = CardDefaults.cardElevation(0.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(spacing.cardPadding),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = if (isDarkMode) Icons.Outlined.DarkMode else Icons.Outlined.LightMode,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(spacing.sm))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Dark Mode",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = if (isDarkMode) "Dark theme is active" else "Light theme is active",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = isDarkMode,
-                        onCheckedChange = onDarkModeToggle,
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary
-                        )
                     )
                 }
             }

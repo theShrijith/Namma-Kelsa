@@ -5,29 +5,29 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nammakelsa.data.Skills
+import com.nammakelsa.data.Customer
 import com.nammakelsa.data.Worker
+import com.nammakelsa.repository.CustomerRepository
+import com.nammakelsa.repository.CustomerRepositoryImpl
 import com.nammakelsa.repository.WorkerRepository
 import com.nammakelsa.repository.WorkerRepositoryImpl
 import com.nammakelsa.repository.onSuccess
 import com.nammakelsa.repository.onFailure
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
  * ViewModel for Customer-specific UI state.
- * Manages search, filters, saved workers, and customer profile.
+ * Manages search, filters, saved workers, customer profile, and login/register form fields.
  */
 class CustomerViewModel(
-    private val workerRepository: WorkerRepository = WorkerRepositoryImpl()
+    private val workerRepository: WorkerRepository = WorkerRepositoryImpl(),
+    private val customerRepository: CustomerRepository = CustomerRepositoryImpl()
 ) : ViewModel() {
 
-    // ── Auth State ──────────────────────────────────────────────────
+    // ── Login Form Fields ────────────────────────────────────────────────────
     var loginEmail by mutableStateOf("")
         private set
     var loginPassword by mutableStateOf("")
@@ -36,6 +36,7 @@ class CustomerViewModel(
     fun onLoginEmailChange(value: String) { loginEmail = value }
     fun onLoginPasswordChange(value: String) { loginPassword = value }
 
+    // ── Registration Form Fields ─────────────────────────────────────────────
     var registerName by mutableStateOf("")
         private set
     var registerPhone by mutableStateOf("")
@@ -53,13 +54,49 @@ class CustomerViewModel(
     fun onRegisterPasswordChange(value: String) { registerPassword = value }
     fun onRegisterConfirmPasswordChange(value: String) { registerConfirmPassword = value }
 
-    // ── Customer Profile ────────────────────────────────────────────
-    var customerName by mutableStateOf("Priya Sharma")
-        private set
-    var customerPhone by mutableStateOf("9876543200")
-        private set
+    // ── Customer Profile (loaded from Firestore) ─────────────────────────────
+    private val _customerProfile = MutableStateFlow<Customer?>(null)
+    val customerProfile: StateFlow<Customer?> = _customerProfile.asStateFlow()
 
-    // ── Search State ────────────────────────────────────────────────
+    /** Display name — real Firestore data; falls back gracefully. */
+    val customerName: String
+        get() = _customerProfile.value?.name?.ifBlank { null } ?: ""
+
+    /** Phone — real Firestore data. */
+    val customerPhone: String
+        get() = _customerProfile.value?.phone ?: ""
+
+    /**
+     * Called after login / session restore to load the customer's real profile from Firestore.
+     */
+    fun loadCustomerProfile(uid: String) {
+        if (uid.isBlank()) return
+        viewModelScope.launch {
+            customerRepository.getCustomerProfile(uid).onSuccess { customer ->
+                _customerProfile.value = customer
+            }.onFailure { /* fail silently — UI will show blank name fallback */ }
+        }
+    }
+
+    /**
+     * Clear customer profile data on logout.
+     */
+    fun clearProfile() {
+        _customerProfile.value = null
+        loginEmail = ""
+        loginPassword = ""
+        registerName = ""
+        registerPhone = ""
+        registerEmail = ""
+        registerPassword = ""
+        registerConfirmPassword = ""
+        searchQuery = ""
+        activeFilter = null
+        savedWorkerIds = emptySet()
+        resetRequestForm()
+    }
+
+    // ── Search State ─────────────────────────────────────────────────────────
     var searchQuery by mutableStateOf("")
         private set
     var activeFilter by mutableStateOf<String?>(null)
@@ -71,7 +108,7 @@ class CustomerViewModel(
         activeFilter = if (activeFilter == skill) null else skill
     }
 
-    // ── Saved Workers ───────────────────────────────────────────────
+    // ── Saved Workers ────────────────────────────────────────────────────────
     var savedWorkerIds by mutableStateOf<Set<String>>(emptySet())
         private set
 
@@ -85,7 +122,7 @@ class CustomerViewModel(
 
     fun isWorkerSaved(workerId: String): Boolean = workerId in savedWorkerIds
 
-    // ── Work Request Form ───────────────────────────────────────────
+    // ── Work Request Form ────────────────────────────────────────────────────
     var requestDescription by mutableStateOf("")
         private set
     var requestLocation by mutableStateOf("")
@@ -105,9 +142,7 @@ class CustomerViewModel(
     fun onRequestBudgetChange(value: String) { requestBudget = value.filter { it.isDigit() }.take(6) }
     fun onRequestNotesChange(value: String) { requestNotes = value }
 
-    fun submitRequest() {
-        requestSubmitted = true
-    }
+    fun submitRequest() { requestSubmitted = true }
 
     fun resetRequestForm() {
         requestDescription = ""
@@ -118,7 +153,7 @@ class CustomerViewModel(
         requestSubmitted = false
     }
 
-    // ── Worker Data (Firestore) ───────────────────────────────────
+    // ── Worker Data (Firestore) ──────────────────────────────────────────────
     private val _workers = MutableStateFlow<List<Worker>>(emptyList())
     val workers: StateFlow<List<Worker>> = _workers.asStateFlow()
 
@@ -163,20 +198,20 @@ class CustomerViewModel(
             return result
         }
 
-    /** Nearby workers (available, sorted by distance) */
+    /** Nearby workers (available, sorted by distance). */
     val nearbyWorkers: List<Worker>
         get() = _workers.value
             .filter { it.isAvailable }
             .sortedBy { it.distance.replace(" km", "").toFloatOrNull() ?: 99f }
             .take(4)
 
-    /** Popular workers (high-rated) */
+    /** Popular workers (high-rated). */
     val popularWorkers: List<Worker>
         get() = _workers.value
             .sortedByDescending { it.rating }
             .take(4)
 
-    /** Saved workers list */
+    /** Saved workers list. */
     val savedWorkers: List<Worker>
         get() = _workers.value.filter { it.id in savedWorkerIds }
 

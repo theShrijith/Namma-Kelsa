@@ -2,6 +2,9 @@ package com.nammakelsa.repository
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.nammakelsa.data.User
 import com.nammakelsa.data.UserRole
 import com.nammakelsa.firebase.FirebaseManager
@@ -22,94 +25,117 @@ class AuthRepositoryImpl(
     private val TAG = "AuthRepository"
 
     override suspend fun login(email: String, password: String): Result<User> {
-        Log.d(TAG, "Login attempt for email: $email")
+        Log.i(TAG, "Login attempt started for email: $email")
         return try {
             val authResult = auth.signInWithEmailAndPassword(email, password).await()
-            val uid = authResult.user?.uid ?: throw Exception("Login failed: UID is null")
+            val firebaseUser = authResult.user
+            val uid = firebaseUser?.uid ?: throw Exception("Login failed: Firebase User or UID is null")
             
-            Log.d(TAG, "Login successful in Firebase Auth, UID: $uid. Fetching user profile...")
+            Log.d(TAG, "Firebase Auth login successful, UID: $uid. Fetching user profile from Firestore...")
             
             // Fetch role from users collection
             when (val userResult = userRepository.getUser(uid)) {
                 is Result.Success -> {
-                    Log.d(TAG, "User profile fetched successfully. Role: ${userResult.data.role}")
+                    Log.i(TAG, "User profile fetched successfully. Role: ${userResult.data.role}")
                     Result.Success(userResult.data)
                 }
                 is Result.Error -> {
-                    Log.e(TAG, "Error fetching user profile", userResult.exception)
-                    throw userResult.exception
+                    Log.e(TAG, "Error fetching user profile from Firestore for UID: $uid", userResult.exception)
+                    Result.Error(userResult.exception)
                 }
-                else -> throw Exception("Unknown error fetching user profile")
+                else -> {
+                    Log.e(TAG, "Unknown error result while fetching user profile for UID: $uid")
+                    Result.Error(Exception("Unknown error fetching user profile"))
+                }
             }
         } catch (e: FirebaseAuthException) {
-            Log.e(TAG, "Firebase Auth Error during login: ${e.errorCode}", e)
+            Log.e(TAG, "Firebase Auth Exception during login: [${e.errorCode}] ${e.message}", e)
             Result.Error(mapFirebaseException(e))
         } catch (e: Exception) {
-            Log.e(TAG, "General Error during login", e)
+            Log.e(TAG, "Unexpected Exception during login for email: $email", e)
             Result.Error(e)
         }
     }
 
     override suspend fun register(email: String, password: String, role: UserRole): Result<User> {
-        Log.d(TAG, "Registration attempt for email: $email, role: $role")
+        Log.i(TAG, "Registration attempt started for email: $email, role: $role")
         return try {
             val authResult = auth.createUserWithEmailAndPassword(email, password).await()
-            val uid = authResult.user?.uid ?: throw Exception("Registration failed: UID is null")
+            val firebaseUser = authResult.user
+            val uid = firebaseUser?.uid ?: throw Exception("Registration failed: Firebase User or UID is null")
 
-            Log.d(TAG, "Registration successful in Firebase Auth, UID: $uid. Saving user profile...")
+            Log.d(TAG, "Firebase Auth registration successful, UID: $uid. Saving user profile to Firestore...")
 
             val newUser = User(uid = uid, email = email, role = role)
             
             // Save role to users collection
             when (val saveResult = userRepository.saveUser(newUser)) {
                 is Result.Success -> {
-                    Log.d(TAG, "User profile saved successfully")
+                    Log.i(TAG, "User profile saved successfully to Firestore for UID: $uid")
                     Result.Success(newUser)
                 }
                 is Result.Error -> {
-                    Log.e(TAG, "Error saving user profile", saveResult.exception)
-                    throw saveResult.exception
+                    Log.e(TAG, "Error saving user profile to Firestore for UID: $uid", saveResult.exception)
+                    Result.Error(saveResult.exception)
                 }
-                else -> throw Exception("Unknown error saving user profile")
+                else -> {
+                    Log.e(TAG, "Unknown error result while saving user profile for UID: $uid")
+                    Result.Error(Exception("Unknown error saving user profile"))
+                }
             }
         } catch (e: FirebaseAuthException) {
-            Log.e(TAG, "Firebase Auth Error during registration: ${e.errorCode}", e)
+            Log.e(TAG, "Firebase Auth Exception during registration: [${e.errorCode}] ${e.message}", e)
             Result.Error(mapFirebaseException(e))
         } catch (e: Exception) {
-            Log.e(TAG, "General Error during registration", e)
+            Log.e(TAG, "Unexpected Exception during registration for email: $email", e)
             Result.Error(e)
         }
     }
 
     override fun getCurrentUser(): User? {
-        val fbUser = auth.currentUser ?: return null
-        return User(uid = fbUser.uid, email = fbUser.email ?: "")
+        val fbUser = auth.currentUser
+        return if (fbUser != null) {
+            Log.d(TAG, "Current session found for UID: ${fbUser.uid}")
+            User(uid = fbUser.uid, email = fbUser.email ?: "")
+        } else {
+            Log.d(TAG, "No current active session found")
+            null
+        }
     }
 
     override suspend fun logout(): Result<Unit> {
-        Log.d(TAG, "Logout attempt")
+        Log.i(TAG, "Logout initiated")
         return try {
             auth.signOut()
-            Log.d(TAG, "Logout successful")
+            Log.d(TAG, "Firebase Auth sign out successful")
             Result.Success(Unit)
         } catch (e: Exception) {
-            Log.e(TAG, "Error during logout", e)
+            Log.e(TAG, "Error during Firebase Auth sign out", e)
             Result.Error(e)
         }
     }
 
+    /**
+     * Maps Firebase Auth error codes to user-friendly messages.
+     * Also handles cases where the error code might not have the ERROR_ prefix.
+     */
     private fun mapFirebaseException(e: FirebaseAuthException): Exception {
-        val message = when (e.errorCode) {
-            "ERROR_INVALID_EMAIL" -> "Invalid email format"
-            "ERROR_USER_NOT_FOUND" -> "User not found"
-            "ERROR_WRONG_PASSWORD" -> "Incorrect password"
-            "ERROR_EMAIL_ALREADY_IN_USE" -> "This email is already registered"
-            "ERROR_WEAK_PASSWORD" -> "Password is too weak"
-            "ERROR_USER_DISABLED" -> "This account has been disabled"
-            "ERROR_TOO_MANY_REQUESTS" -> "Too many failed attempts. Try again later"
-            "ERROR_OPERATION_NOT_ALLOWED" -> "Email/Password authentication is not enabled"
-            "CONFIGURATION_NOT_FOUND" -> "Firebase configuration issue. Please check API settings"
-            else -> e.localizedMessage ?: "Authentication failed"
+        val errorCode = e.errorCode.uppercase().removePrefix("ERROR_")
+        Log.d(TAG, "Mapping normalized error code: $errorCode")
+
+        val message = when (errorCode) {
+            "INVALID_EMAIL" -> "Invalid email format"
+            "USER_NOT_FOUND" -> "User not found. Please register first."
+            "WRONG_PASSWORD" -> "Incorrect password"
+            "EMAIL_ALREADY_IN_USE" -> "This email is already registered"
+            "WEAK_PASSWORD" -> "Password should be at least 6 characters"
+            "USER_DISABLED" -> "This account has been disabled"
+            "TOO_MANY_REQUESTS" -> "Too many failed attempts. Try again later"
+            "OPERATION_NOT_ALLOWED" -> "Email/Password sign-in is not enabled in Firebase Console."
+            "CONFIGURATION_NOT_FOUND" -> "Firebase Authentication is not configured correctly. Ensure Email/Password provider is enabled in the Firebase Console."
+            "NETWORK_REQUEST_FAILED" -> "Network error. Please check your internet connection."
+            "INTERNAL_ERROR" -> "An internal error occurred. Please try again later."
+            else -> e.localizedMessage ?: "Authentication failed ($errorCode)"
         }
         return Exception(message)
     }
