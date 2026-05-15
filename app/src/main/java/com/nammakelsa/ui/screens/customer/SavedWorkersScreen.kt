@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.nammakelsa.data.Worker
+import com.nammakelsa.models.Worker
 import com.nammakelsa.ui.components.EmptyState
 import com.nammakelsa.ui.components.WorkerCard
 import com.nammakelsa.ui.theme.LocalSpacing

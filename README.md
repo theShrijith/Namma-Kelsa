@@ -1,132 +1,182 @@
-# 🔨 Namma Kelsa
+# 🔨 Namma Kelsa (ನಮ್ಮ ಕೆಲಸ)
 
-> A clean, modern **labor marketplace** Android app built with **Kotlin + Jetpack Compose + Material 3**.
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.x-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
+[![Compose](https://img.shields.io/badge/Jetpack%20Compose-2024.09.00-green.svg?style=flat&logo=android)](https://developer.android.com/jetpack/compose)
+[![Material 3](https://img.shields.io/badge/Material%203-Latest-purple.svg?style=flat&logo=materialdesign)](https://m3.material.io)
+[![Firebase](https://img.shields.io/badge/Firebase-Integrated-orange.svg?style=flat&logo=firebase)](https://firebase.google.com)
+[![Architecture](https://img.shields.io/badge/Architecture-MVVM%20+%20Clean-red.svg?style=flat)](https://developer.android.com/topic/architecture)
 
-Find skilled workers near you — painters, plumbers, electricians, carpenters, and more.
-
----
-
-## 📱 Screenshots
-
-| Splash | Login | Home | Search | Worker Detail | Settings |
-|--------|-------|------|--------|---------------|----------|
-| _coming soon_ | _coming soon_ | _coming soon_ | _coming soon_ | _coming soon_ | _coming soon_ |
+> **Namma Kelsa** (meaning "Our Work") is a professional-grade, multi-role labor marketplace platform designed to bridge the gap between local skilled workers and customers. Built with a focus on modern Android development standards, clean architecture, and premium user experience.
 
 ---
 
-## ✨ Features
-
-- 🎨 **Material 3 Design** — `#1976D2` blue primary, light & dark mode
-- 🌙 **Dark Mode Toggle** — Switch from Settings screen
-- 📐 **8dp Spacing Grid** — Consistent padding and margins everywhere
-- 🔍 **Worker Search** — Filter by skill, search by name
-- 👤 **Worker Profiles** — Skills, daily rate, availability, work gallery
-- 🏠 **Worker Dashboard** — Availability toggle, stats, quick actions
-- 📱 **Touch-Friendly** — Large buttons (56dp), inputs (64dp) for accessibility
-- 🔄 **UI States** — Loading, empty, error, and offline screens
-- 🧭 **Bottom Navigation** — Home, Search, Profile tabs with state restoration
+## 📖 Table of Contents
+1. [Problem Statement](#-problem-statement)
+2. [Project Objective](#-project-objective)
+3. [Core Features](#-core-features)
+4. [Tech Stack](#-tech-stack)
+5. [Architecture Overview](#-architecture-overview)
+6. [Firebase Integration](#-firebase-integration)
+7. [Project Structure](#-project-structure)
+8. [Screenshots](#-screenshots)
+9. [Getting Started](#-getting-started)
+10. [Future Roadmap](#-future-roadmap)
 
 ---
 
-## 🏗️ Tech Stack
+## 🚩 Problem Statement
+In many urban and semi-urban areas, finding reliable, skilled local labor (painters, plumbers, electricians) is a fragmented and inefficient process. Conversely, skilled workers often struggle to find consistent work and lack a professional digital presence to showcase their expertise and availability.
 
-| Layer | Technology |
-|-------|-----------|
-| Language | Kotlin |
-| UI Framework | Jetpack Compose |
-| Design System | Material 3 |
-| Navigation | Jetpack Navigation Compose |
-| State Management | ViewModel + Compose State |
-| Min SDK | 26 (Android 8.0) |
-| Target SDK | 34 (Android 14) |
+## 🎯 Project Objective
+To build a **trust-based labor marketplace** that provides:
+- **For Customers:** A seamless way to discover, filter, and contact verified local workers.
+- **For Workers:** A professional platform to manage their digital identity, showcase work galleries, and manage job requests.
+
+---
+
+## ✨ Core Features
+
+### 👤 Role-Based Authentication
+- **Dual User Roles:** Separate onboarding and dashboard experiences for Customers and Workers.
+- **Firebase Auth:** Secure email/password login with session persistence.
+- **Custom Worker ID:** Unique `NK-WRK-xxxx` generation for professional worker identification.
+
+### 🔍 Discovery & Marketplace
+- **Smart Filtering:** Filter workers by skill categories (Painter, Plumber, etc.).
+- **Search:** Real-time search by name or skill.
+- **Availability System:** Real-time "Available/Busy" status toggle for workers.
+
+### 💼 Workflow Management
+- **Work Requests:** Customers can send detailed work requests (description, budget, location).
+- **Worker Dashboard:** Manage incoming requests with Accept/Reject workflows.
+- **Worker Portfolio:** High-quality image gallery to showcase previous work.
+
+### 🎨 Premium UX/UI
+- **Material 3 Design:** Full implementation of M3 tokens, typography, and color systems.
+- **Dynamic Theming:** Seamless support for Light and Dark modes.
+- **Consistent Spacing:** Strict 8dp grid system for internship-quality layouts.
+
+---
+
+## 🛠️ Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| **Language** | Kotlin |
+| **UI Framework** | Jetpack Compose (Modern Declarative UI) |
+| **Design System** | Material 3 (M3) |
+| **Navigation** | Jetpack Navigation Compose (Type-safe routing) |
+| **Networking** | Firebase SDKs |
+| **Database** | Cloud Firestore (Real-time NoSQL) |
+| **Storage** | Firebase Storage (Media uploads) |
+| **Concurrency** | Kotlin Coroutines & Flow |
+| **Architecture** | MVVM + Repository Pattern |
+
+---
+
+## 🏗️ Architecture Overview
+
+The project follows **Clean Architecture** principles and the **MVVM (Model-View-ViewModel)** pattern to ensure scalability, maintainability, and testability.
+
+### Layers:
+1. **UI Layer (Compose):** Stateless composables driven by ViewModels.
+2. **State Layer (ViewModel):** Manages UI state using `StateFlow` and handles user events.
+3. **Domain/Data Layer (Repository):** The single source of truth for data operations, abstracting Firebase complexities.
+4. **Model Layer:** Decoupled data models representing core business entities.
+
+---
+
+## 🔥 Firebase Integration
+
+- **Authentication:** Manages user sessions and role-based access control.
+- **Firestore:**
+    - `users`: Core authentication and role data.
+    - `workers`: Detailed profiles, skills, and availability.
+    - `customers`: Customer-specific profiles.
+    - `requests`: The transaction layer for labor hiring.
+- **Storage:** Stores profile pictures and worker work galleries.
 
 ---
 
 ## 📂 Project Structure
 
-```
-app/src/main/java/com/nammakelsa/
-├── MainActivity.kt                 # Entry point
-├── data/
-│   └── Models.kt                   # Worker, Skills
-├── viewmodel/
-│   └── AppViewModel.kt             # All UI state
-├── navigation/
-│   ├── Screen.kt                   # Route definitions
-│   └── NavGraph.kt                 # NavHost + Bottom bar
-└── ui/
-    ├── theme/
-    │   ├── Color.kt                # Color tokens
-    │   ├── Spacing.kt              # 8dp grid system
-    │   ├── Type.kt                 # Typography
-    │   └── Theme.kt                # Material 3 theme
-    ├── components/
-    │   ├── CommonComponents.kt     # Buttons, chips, inputs, badges
-    │   ├── WorkerCard.kt           # Search result card
-    │   └── StateComponents.kt      # Loading, empty, error states
-    └── screens/
-        ├── SplashScreen.kt
-        ├── LoginScreen.kt
-        ├── ProfileSetupScreen.kt
-        ├── HomeScreen.kt
-        ├── SearchScreen.kt
-        ├── WorkerDetailScreen.kt
-        └── SettingsScreen.kt
+```bash
+com.nammakelsa/
+├── MainActivity.kt             # Application Entry Point
+├── NammaKelsaApplication.kt    # Firebase Initialization
+├── models/                     # Decoupled Data Models
+│   ├── Worker.kt
+│   ├── Customer.kt
+│   └── WorkRequest.kt
+├── repository/                 # Data Abstraction Layer
+│   ├── AuthRepository.kt
+│   ├── WorkerRepository.kt
+│   └── RequestRepository.kt
+├── viewmodel/                  # Business Logic & State
+│   ├── AuthViewModel.kt
+│   ├── CustomerViewModel.kt
+│   └── WorkerViewModel.kt
+├── navigation/                 # Navigation Logic
+│   ├── Screen.kt
+│   └── NavGraph.kt
+├── ui/
+│   ├── theme/                  # M3 Theme, Color, Spacing, Type
+│   ├── components/             # Reusable Atomized UI
+│   │   ├── AppButtons.kt
+│   │   ├── AppTextFields.kt
+│   │   └── WorkerCard.kt
+│   └── screens/                # Feature-specific Screen Composables
+│       ├── customer/
+│       └── worker/
+└── utils/                      # Helper extensions and constants
 ```
 
 ---
 
-## ▶️ Getting Started
+## 📱 Screenshots
+
+| Splash | Role Selection | Worker Registration | Customer Home |
+|:---:|:---:|:---:|:---:|
+| ![Splash](https://via.placeholder.com/200x400?text=Splash) | ![Role](https://via.placeholder.com/200x400?text=Role+Selection) | ![Register](https://via.placeholder.com/200x400?text=Registration) | ![Home](https://via.placeholder.com/200x400?text=Home) |
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
+- Android Studio Ladybug (2024.2.1) or newer
+- JDK 17+
+- A Firebase project with Auth and Firestore enabled
 
-- Android Studio Hedgehog (2023.1.1) or newer
-- JDK 17
-- Android SDK 34
+### Setup Instructions
+1. **Clone the repo:**
+   ```bash
+   git clone https://github.com/Priyanka/Namma-Kelsa.git
+   ```
+2. **Firebase Configuration:**
+   - Add your `google-services.json` to the `app/` directory.
+   - Enable **Email/Password** authentication in the Firebase Console.
+   - Create a **Cloud Firestore** database.
 
-### Run Locally
-
-```bash
-# Clone the repository
-git clone https://github.com/theShrijith/Namma-Kelsa.git
-
-# Open in Android Studio
-# File → Open → select the project folder
-
-# Sync Gradle and run on emulator or device
-```
-
----
-
-## 🗺️ Roadmap
-
-- [ ] Firebase Authentication (Phone OTP)
-- [ ] Firestore database integration
-- [ ] Real image upload with Firebase Storage
-- [ ] Location-based worker search
-- [ ] Push notifications
-- [ ] Multi-language support (Kannada, Hindi)
-- [ ] Rating & review system
-- [ ] Chat between customer and worker
+3. **Build & Run:**
+   - Sync Gradle in Android Studio.
+   - Run on an emulator (API 26+) or physical device.
 
 ---
 
-## 📄 License
-
-This project is for educational purposes.
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## 🔮 Future Roadmap
+- [ ] **Location Services:** Integrate Google Maps for distance-based worker discovery.
+- [ ] **Real-time Chat:** In-app messaging between customers and workers.
+- [ ] **Reviews & Ratings:** Trust building through verified user feedback.
+- [ ] **Multilingual Support:** Support for Kannada and Hindi localizations.
+- [ ] **Payment Integration:** Secure escrow-based payments for completed work.
 
 ---
 
+## 👥 Team
+- **Priyanka** — Lead Developer & Architect
+
+---
 <p align="center">
-  Built with ❤️ using Kotlin & Jetpack Compose
+  Built with ❤️ using <b>Kotlin & Jetpack Compose</b>
 </p>

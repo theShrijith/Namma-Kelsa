@@ -24,11 +24,11 @@ import com.nammakelsa.ui.screens.*
 import com.nammakelsa.ui.screens.customer.*
 import com.nammakelsa.ui.screens.worker.*
 import com.nammakelsa.viewmodel.AppViewModel
-import com.nammakelsa.viewmodel.AuthState
+import com.nammakelsa.state.AuthState
 import com.nammakelsa.viewmodel.AuthViewModel
 import com.nammakelsa.viewmodel.CustomerViewModel
 import com.nammakelsa.viewmodel.WorkerViewModel
-import com.nammakelsa.data.UserRole
+import com.nammakelsa.models.UserRole
 import kotlinx.coroutines.launch
 
 // ── Bottom Nav Items ─────────────────────────────────────────────────────────

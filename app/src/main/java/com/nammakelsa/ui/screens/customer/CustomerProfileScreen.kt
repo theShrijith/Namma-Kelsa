@@ -36,75 +36,11 @@ fun CustomerProfileScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // ── Profile Header ──────────────────────────────────────────
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        listOf(SplashGradientTop, SplashGradientBottom)
-                    ),
-                    shape = RoundedCornerShape(
-                        bottomStart = spacing.lg,
-                        bottomEnd = spacing.lg
-                    )
-                )
-                .padding(top = 52.dp, bottom = spacing.lg + spacing.xs),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                // Avatar
-                Box(
-                    modifier = Modifier
-                        .size(spacing.avatarLarge)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.15f))
-                        .border(3.dp, Color.White.copy(alpha = 0.5f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (customerName.isBlank()) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = Color.White,
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Text(
-                            text = customerName.first().uppercase(),
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 40.sp
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(spacing.sm))
-
-                if (customerName.isBlank()) {
-                    Spacer(modifier = Modifier.height(spacing.xs))
-                    LinearProgressIndicator(
-                        modifier = Modifier.width(100.dp).height(4.dp).clip(RoundedCornerShape(2.dp)),
-                        color = Color.White,
-                        trackColor = Color.White.copy(alpha = 0.3f)
-                    )
-                } else {
-                    Text(
-                        text = customerName,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp,
-                        color = Color.White
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(spacing.xxs))
-
-                Text(
-                    text = if (customerPhone.isNotBlank()) "+91 $customerPhone" else "Phone number not added",
-                    fontSize = 14.sp,
-                    color = Color.White.copy(alpha = 0.8f)
-                )
-            }
-        }
+        // Profile Header
+        ProfileHeader(
+            name = customerName,
+            subtitle = if (customerPhone.isNotBlank()) "+91 $customerPhone" else "Phone number not added"
+        )
 
         // ── Content ─────────────────────────────────────────────────
         Column(

@@ -5,8 +5,8 @@ import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import com.nammakelsa.data.User
-import com.nammakelsa.data.UserRole
+import com.nammakelsa.models.User
+import com.nammakelsa.models.UserRole
 import com.nammakelsa.firebase.FirebaseManager
 import kotlinx.coroutines.tasks.await
 

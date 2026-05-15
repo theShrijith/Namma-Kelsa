@@ -6,9 +6,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
-import com.nammakelsa.data.RequestStatus
-import com.nammakelsa.data.WorkRequest
-import com.nammakelsa.data.Worker
+import com.nammakelsa.models.RequestStatus
+import com.nammakelsa.models.WorkRequest
+import com.nammakelsa.models.Worker
 import com.nammakelsa.repository.StorageRepository
 import com.nammakelsa.repository.StorageRepositoryImpl
 import com.nammakelsa.repository.WorkerRepository

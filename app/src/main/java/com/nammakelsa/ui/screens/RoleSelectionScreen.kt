@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nammakelsa.ui.components.*
 import com.nammakelsa.ui.theme.*
 
 @Composable
@@ -53,48 +54,22 @@ fun RoleSelectionScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // ── Top gradient header ─────────────────────────────────────
-        Box(
+        // Header
+        AuthHeader(
+            title = "Namma Kelsa",
+            subtitle = "Your local labor marketplace",
             modifier = Modifier
-                .fillMaxWidth()
-                .height(260.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        listOf(SplashGradientTop, SplashGradientBottom)
-                    ),
-                    shape = RoundedCornerShape(
-                        bottomStart = spacing.xl,
-                        bottomEnd = spacing.xl
-                    )
-                ),
-            contentAlignment = Alignment.Center
+                .scale(contentScale)
+                .alpha(contentAlpha),
+            height = 260.dp
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .scale(contentScale)
-                    .alpha(contentAlpha)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Handyman,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(48.dp)
-                )
-                Spacer(modifier = Modifier.height(spacing.xs))
-                Text(
-                    text = "Namma Kelsa",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "Your local labor marketplace",
-                    fontSize = 14.sp,
-                    color = Color.White.copy(alpha = 0.85f)
-                )
-            }
+            Icon(
+                imageVector = Icons.Default.Handyman,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(48.dp)
+            )
+            Spacer(modifier = Modifier.height(spacing.xs))
         }
 
         // ── Content area ────────────────────────────────────────────
@@ -153,71 +128,4 @@ fun RoleSelectionScreen(
     }
 }
 
-@Composable
-private fun RoleCard(
-    icon: ImageVector,
-    title: String,
-    description: String,
-    onClick: () -> Unit,
-    containerColor: Color,
-    iconTint: Color
-) {
-    val spacing = LocalSpacing.current
 
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(spacing.md),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(spacing.huge)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(containerColor),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = iconTint,
-                    modifier = Modifier.size(spacing.lg)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(spacing.sm))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(spacing.xxs))
-                Text(
-                    text = description,
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 18.sp
-                )
-            }
-
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.size(24.dp)
-            )
-        }
-    }
-}

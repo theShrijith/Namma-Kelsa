@@ -4,7 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.nammakelsa.data.UserRole
+import com.nammakelsa.models.UserRole
 
 /**
  * Shared ViewModel — holds global UI state such as theme and role selection.

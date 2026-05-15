@@ -1,12 +1,13 @@
 package com.nammakelsa.repository
 
-import com.nammakelsa.data.WorkRequest
+import com.nammakelsa.models.WorkRequest
+import com.nammakelsa.models.RequestStatus
 
 interface RequestRepository {
     suspend fun createRequest(request: WorkRequest): Result<Unit>
     suspend fun getRequestsForWorker(workerId: String): Result<List<WorkRequest>>
     suspend fun getRequestsForCustomer(customerId: String): Result<List<WorkRequest>>
-    suspend fun updateRequestStatus(requestId: String, status: com.nammakelsa.data.RequestStatus): Result<Unit>
+    suspend fun updateRequestStatus(requestId: String, status: RequestStatus): Result<Unit>
 }
 
 class RequestRepositoryImpl : RequestRepository {
@@ -27,7 +28,7 @@ class RequestRepositoryImpl : RequestRepository {
 
     override suspend fun updateRequestStatus(
         requestId: String,
-        status: com.nammakelsa.data.RequestStatus
+        status: RequestStatus
     ): Result<Unit> {
         // Mock implementation
         return Result.Success(Unit)

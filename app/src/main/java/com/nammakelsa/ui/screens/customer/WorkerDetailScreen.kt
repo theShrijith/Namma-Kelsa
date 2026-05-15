@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nammakelsa.data.Worker
+import com.nammakelsa.models.Worker
 import com.nammakelsa.ui.components.*
 import com.nammakelsa.ui.theme.*
 
@@ -298,48 +298,4 @@ fun WorkerDetailScreen(
 
 // ── Info Card ───────────────────────────────────────────────────────
 
-@Composable
-private fun InfoCard(
-    icon: ImageVector,
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    val spacing = LocalSpacing.current
 
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(spacing.cornerRadius),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(22.dp)
-            )
-            Spacer(modifier = Modifier.height(spacing.xs))
-            Text(
-                text = value,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = label,
-                fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = FontWeight.Medium
-            )
-        }
-    }
-}

@@ -63,92 +63,19 @@ fun WorkerProfileScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // ── Profile Header ──────────────────────────────────────────
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        listOf(
-                            AccentGreen.copy(alpha = 0.9f),
-                            AccentGreen.copy(alpha = 0.7f)
-                        )
-                    ),
-                    shape = RoundedCornerShape(
-                        bottomStart = spacing.lg,
-                        bottomEnd = spacing.lg
-                    )
+        // Profile Header
+        ProfileHeader(
+            name = workerName,
+            subtitle = workerEmail,
+            onAvatarClick = { profileLauncher.launch("image/*") },
+            extraContent = {
+                Text(
+                    text = if (workerPhone.isNotBlank()) "+91 $workerPhone" else "Phone number not added",
+                    fontSize = 14.sp,
+                    color = Color.White.copy(alpha = 0.8f)
                 )
-                .padding(top = 52.dp, bottom = spacing.lg + spacing.xs),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                // Avatar
-                Box(
-                    modifier = Modifier
-                        .size(spacing.avatarLarge)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.15f))
-                        .border(3.dp, Color.White.copy(alpha = 0.5f), CircleShape)
-                        .clickable { profileLauncher.launch("image/*") },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (profileImageUrl != null) {
-                        // Coil AsyncImage can be placed here. Fallback to letter for now
-                        Text(
-                            text = "Img",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
-                        )
-                    } else {
-                        if (workerName.isBlank()) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = Color.White,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Text(
-                                text = workerName.first().uppercase(),
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 40.sp
-                            )
-                        }
-                    }
-                }
 
-                Spacer(modifier = Modifier.height(spacing.sm))
-
-                if (workerName.isBlank()) {
-                    LinearProgressIndicator(
-                        modifier = Modifier.width(100.dp).height(4.dp).clip(RoundedCornerShape(2.dp)),
-                        color = Color.White,
-                        trackColor = Color.White.copy(alpha = 0.3f)
-                    )
-                } else {
-                    Text(
-                        text = workerName,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp,
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.height(spacing.xxs))
-                    Text(
-                        text = workerEmail,
-                        fontSize = 14.sp,
-                        color = Color.White.copy(alpha = 0.8f)
-                    )
-                    Spacer(modifier = Modifier.height(spacing.xxs))
-                    Text(
-                        text = if (workerPhone.isNotBlank()) "+91 $workerPhone" else "Phone number not added",
-                        fontSize = 14.sp,
-                        color = Color.White.copy(alpha = 0.8f)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(spacing.xxs))
+                Spacer(modifier = Modifier.height(spacing.xs))
 
                 // Worker ID badge
                 Surface(
@@ -173,7 +100,7 @@ fun WorkerProfileScreen(
                     color = Color.White.copy(alpha = 0.85f)
                 )
             }
-        }
+        )
 
         // ── Content ─────────────────────────────────────────────────
         Column(

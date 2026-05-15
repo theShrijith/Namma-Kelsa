@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nammakelsa.data.Worker
+import com.nammakelsa.models.Worker
 import com.nammakelsa.ui.theme.*
 
 /**

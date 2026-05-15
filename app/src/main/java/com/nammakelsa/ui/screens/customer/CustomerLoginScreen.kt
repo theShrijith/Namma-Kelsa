@@ -31,8 +31,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nammakelsa.ui.components.AppTextField
-import com.nammakelsa.ui.components.PrimaryButton
+import com.nammakelsa.ui.components.*
 import com.nammakelsa.ui.theme.*
 
 @Composable
@@ -68,55 +67,22 @@ fun CustomerLoginScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // ── Top gradient header ─────────────────────────────────────
-        Box(
+        // Header
+        AuthHeader(
+            title = "Namma Kelsa",
+            subtitle = "Customer Login",
             modifier = Modifier
-                .fillMaxWidth()
-                .height(260.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        listOf(SplashGradientTop, SplashGradientBottom)
-                    ),
-                    shape = RoundedCornerShape(
-                        bottomStart = spacing.xl,
-                        bottomEnd = spacing.xl
-                    )
-                ),
-            contentAlignment = Alignment.Center
+                .scale(contentScale)
+                .alpha(contentAlpha),
+            height = 260.dp
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .scale(contentScale)
-                    .alpha(contentAlpha)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Handyman,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(48.dp)
-                )
-                Spacer(modifier = Modifier.height(spacing.xs))
-                Text(
-                    text = "Namma Kelsa",
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = Color.White.copy(alpha = 0.2f)
-                ) {
-                    Text(
-                        text = "Customer Login",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                        color = Color.White,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 13.sp
-                    )
-                }
-            }
+            Icon(
+                imageVector = Icons.Default.Handyman,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(48.dp)
+            )
+            Spacer(modifier = Modifier.height(spacing.xs))
         }
 
         // ── Form area ───────────────────────────────────────────────

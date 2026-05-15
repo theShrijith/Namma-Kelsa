@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nammakelsa.data.Notification
-import com.nammakelsa.data.NotificationType
+import com.nammakelsa.models.Notification
+import com.nammakelsa.models.NotificationType
 import com.nammakelsa.ui.components.EmptyState
 import com.nammakelsa.ui.theme.*
 

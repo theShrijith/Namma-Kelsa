@@ -226,49 +226,4 @@ fun WorkerAvailabilityScreen(
     }
 }
 
-@Composable
-private fun SummaryCard(
-    icon: ImageVector,
-    value: String,
-    label: String,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    val spacing = LocalSpacing.current
 
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(spacing.cornerRadius),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(spacing.cardPadding),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.height(spacing.xs))
-            Text(
-                text = value,
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = label,
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = FontWeight.Medium
-            )
-        }
-    }
-}

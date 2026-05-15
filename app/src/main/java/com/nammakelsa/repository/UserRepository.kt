@@ -1,6 +1,6 @@
 package com.nammakelsa.repository
 
-import com.nammakelsa.data.User
+import com.nammakelsa.models.User
 import com.nammakelsa.firebase.FirebaseManager
 import kotlinx.coroutines.tasks.await
 

@@ -27,8 +27,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nammakelsa.ui.components.AppTextField
-import com.nammakelsa.ui.components.PrimaryButton
+import com.nammakelsa.ui.components.*
 import com.nammakelsa.ui.theme.*
 
 @Composable
@@ -75,42 +74,15 @@ fun CustomerRegisterScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // ── Top gradient header ─────────────────────────────────────
-        Box(
+        // Header
+        AuthHeader(
+            title = "Create Account",
+            subtitle = "Join as a Customer",
             modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        listOf(SplashGradientTop, SplashGradientBottom)
-                    ),
-                    shape = RoundedCornerShape(
-                        bottomStart = spacing.xl,
-                        bottomEnd = spacing.xl
-                    )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .scale(contentScale)
-                    .alpha(contentAlpha)
-            ) {
-                Text(
-                    text = "Create Account",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "Join as a Customer",
-                    fontSize = 14.sp,
-                    color = Color.White.copy(alpha = 0.85f)
-                )
-            }
-        }
+                .scale(contentScale)
+                .alpha(contentAlpha),
+            height = 200.dp
+        )
 
         // ── Form Content ────────────────────────────────────────────
         Column(

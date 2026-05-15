@@ -1,6 +1,6 @@
 package com.nammakelsa.repository
 
-import com.nammakelsa.data.Notification
+import com.nammakelsa.models.Notification
 
 interface NotificationRepository {
     suspend fun createNotification(notification: Notification): Result<Unit>

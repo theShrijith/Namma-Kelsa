@@ -3,10 +3,10 @@ package com.nammakelsa.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nammakelsa.data.Customer
-import com.nammakelsa.data.User
-import com.nammakelsa.data.UserRole
-import com.nammakelsa.data.Worker
+import com.nammakelsa.models.Customer
+import com.nammakelsa.models.User
+import com.nammakelsa.models.UserRole
+import com.nammakelsa.models.Worker
 import com.nammakelsa.repository.AuthRepository
 import com.nammakelsa.repository.AuthRepositoryImpl
 import com.nammakelsa.repository.CustomerRepository
@@ -20,21 +20,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.nammakelsa.state.AuthState
 
-// ── Centralized Auth State ───────────────────────────────────────────────────
-sealed class AuthState {
-    /** Initial state — session check has not completed yet. */
-    object Initializing : AuthState()
 
-    /** No authenticated user; navigate to Role Selection. */
-    object Unauthenticated : AuthState()
-
-    /** Authenticated customer. */
-    data class AuthenticatedCustomer(val user: User) : AuthState()
-
-    /** Authenticated worker. */
-    data class AuthenticatedWorker(val user: User) : AuthState()
-}
 
 class AuthViewModel(
     private val authRepository: AuthRepository = AuthRepositoryImpl(),

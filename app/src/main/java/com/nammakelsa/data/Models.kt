@@ -1,4 +1,4 @@
-package com.nammakelsa.data
+package com.nammakelsa.models
 
 /**
  * Represents a worker in the marketplace.

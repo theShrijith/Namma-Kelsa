@@ -28,7 +28,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nammakelsa.data.Skills
+import com.nammakelsa.models.Skills
 import com.nammakelsa.ui.components.*
 import com.nammakelsa.ui.theme.*
 
@@ -70,99 +70,10 @@ fun WorkerRegisterScreen(
             visible = isComplete,
             enter = fadeIn() + scaleIn()
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(horizontal = spacing.lg)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(CircleShape)
-                            .background(AccentGreen.copy(alpha = 0.12f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = null,
-                            tint = AccentGreen,
-                            modifier = Modifier.size(48.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(spacing.md))
-
-                    Text(
-                        text = "Registration Successful!",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(spacing.sm))
-
-                    Text(
-                        text = "Your Worker ID has been created successfully",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(spacing.md))
-
-                    // Worker ID card
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = AccentGreen.copy(alpha = 0.08f)
-                        ),
-                        elevation = CardDefaults.cardElevation(0.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(spacing.md),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Your Worker ID",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(spacing.xs))
-                            Text(
-                                text = generatedWorkerId,
-                                fontSize = 28.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = AccentGreen,
-                                letterSpacing = 2.sp
-                            )
-                            Spacer(modifier = Modifier.height(spacing.xs))
-                            Text(
-                                text = "Save this ID for login",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(spacing.lg))
-
-                    PrimaryButton(
-                        text = "Continue to Dashboard",
-                        onClick = onContinueClick,
-                        icon = Icons.Default.ArrowForward
-                    )
-                }
-            }
+            WorkerRegistrationSuccess(
+                workerId = generatedWorkerId,
+                onContinueClick = onContinueClick
+            )
         }
 
         // Registration form
@@ -172,40 +83,18 @@ fun WorkerRegisterScreen(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
             ) {
-                // ── Header ──────────────────────────────────────────
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                listOf(
-                                    AccentGreen.copy(alpha = 0.9f),
-                                    AccentGreen.copy(alpha = 0.7f)
-                                )
-                            ),
-                            shape = RoundedCornerShape(
-                                bottomStart = spacing.xl,
-                                bottomEnd = spacing.xl
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Worker Registration",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
+                // Header
+                AuthHeader(
+                    title = "Worker Registration",
+                    subtitle = "Create your worker profile",
+                    height = 180.dp,
+                    brush = Brush.verticalGradient(
+                        listOf(
+                            AccentGreen.copy(alpha = 0.9f),
+                            AccentGreen.copy(alpha = 0.7f)
                         )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "Create your worker profile",
-                            fontSize = 14.sp,
-                            color = Color.White.copy(alpha = 0.85f)
-                        )
-                    }
-                }
+                    )
+                )
 
                 // ── Form ────────────────────────────────────────────
                 Column(

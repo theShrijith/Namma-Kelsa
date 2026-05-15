@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -20,11 +21,13 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nammakelsa.ui.components.AppTextField
-import com.nammakelsa.ui.components.PrimaryButton
+import com.nammakelsa.ui.components.*
 import com.nammakelsa.ui.theme.*
 
 @Composable
@@ -60,58 +63,28 @@ fun WorkerLoginScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // ── Top gradient header ─────────────────────────────────────
-        Box(
+        // Header
+        AuthHeader(
+            title = "Namma Kelsa",
+            subtitle = "Worker Login",
             modifier = Modifier
-                .fillMaxWidth()
-                .height(260.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        listOf(
-                            AccentGreen.copy(alpha = 0.9f),
-                            AccentGreen.copy(alpha = 0.7f)
-                        )
-                    ),
-                    shape = RoundedCornerShape(
-                        bottomStart = spacing.xl,
-                        bottomEnd = spacing.xl
-                    )
-                ),
-            contentAlignment = Alignment.Center
+                .scale(contentScale)
+                .alpha(contentAlpha),
+            height = 260.dp,
+            brush = Brush.verticalGradient(
+                listOf(
+                    AccentGreen.copy(alpha = 0.9f),
+                    AccentGreen.copy(alpha = 0.7f)
+                )
+            )
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .scale(contentScale)
-                    .alpha(contentAlpha)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Build,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(48.dp)
-                )
-                Spacer(modifier = Modifier.height(spacing.xs))
-                Text(
-                    text = "Namma Kelsa",
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = Color.White.copy(alpha = 0.2f)
-                ) {
-                    Text(
-                        text = "Worker Login",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                        color = Color.White,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 13.sp
-                    )
-                }
-            }
+            Icon(
+                imageVector = Icons.Default.Build,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(48.dp)
+            )
+            Spacer(modifier = Modifier.height(spacing.xs))
         }
 
         // ── Form area ───────────────────────────────────────────────

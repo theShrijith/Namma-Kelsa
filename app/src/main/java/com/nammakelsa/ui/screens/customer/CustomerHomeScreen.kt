@@ -19,8 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nammakelsa.data.Skills
-import com.nammakelsa.data.Worker
+import com.nammakelsa.models.Skills
+import com.nammakelsa.models.Worker
 import com.nammakelsa.ui.components.*
 import com.nammakelsa.ui.theme.*
 

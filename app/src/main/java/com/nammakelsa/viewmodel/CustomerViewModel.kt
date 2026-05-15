@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nammakelsa.data.Customer
-import com.nammakelsa.data.Worker
+import com.nammakelsa.models.Customer
+import com.nammakelsa.models.Worker
 import com.nammakelsa.repository.CustomerRepository
 import com.nammakelsa.repository.CustomerRepositoryImpl
 import com.nammakelsa.repository.WorkerRepository
